@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Insulin Resistance Suite: HOMA-IR • HOMA-β • QUICKI • Matsuda</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<style>
+  body{background:#f8fafc}
+  .card{border:0;border-radius:14px}
+  .unit-hint{font-size:.9rem;color:#6c757d}
+  .warn{font-size:.85rem}
+  .mono{font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, monospace}
+  .btn-check:checked + .btn{box-shadow:0 0 0 .2rem rgba(13,110,253,.25)}
+</style>
+</head>
+<body>
+<div class="container my-4">
+  <h1 class="text-center mb-1">Insulin Resistance Indices</h1>
+  <p class="text-center text-muted mb-3">HOMA-IR • HOMA-β • QUICKI • Matsuda (± ISI 0/120)</p>
+
+  <div class="card shadow-sm p-3 p-sm-4">
+    <!-- Units -->
+    <div class="row g-3">
+      <div class="col-12 col-md-6">
+        <label class="form-label fw-semibold">Glucose units</label>
+        <div class="btn-group w-100" role="group">
+          <input type="radio" class="btn-check" name="gunit" id="g-mg" checked>
+          <label class="btn btn-outline-primary" for="g-mg">mg/dL</label>
+          <input type="radio" class="btn-check" name="gunit" id="g-mmol">
+          <label class="btn btn-outline-primary" for="g-mmol">mmol/L</label>
+        </div>
+      </div>
+      <div class="col-12 col-md-6">
+        <label class="form-label fw-semibold">Insulin units</label>
+        <div class="btn-group w-100" role="group">
+          <input type="radio" class="btn-check" name="iunit" id="i-uU" checked>
+          <label class="btn btn-outline-primary" for="i-uU">µU/mL</label>
+          <input type="radio" class="btn-check" name="iunit" id="i-pmol">
+          <label class="btn btn-outline-primary" for="i-pmol">pmol/L</label>
+        </div>
+        <div class="unit-hint mt-1">Conversion used: 1 µU/mL ≈ 6 pmol/L (human insulin).</div>
+      </div>
+    </div>
+
+    <hr class="my-4">
+
+    <!-- Fasting inputs -->
+    <h5 class="mb-2">Fasting values</h5>
+    <div class="row g-3">
+      <div class="col-12 col-md-6">
+        <label class="form-label fw-semibold">Fasting glucose</label>
+        <div class="input-group">
+          <input type="number" inputmode="decimal" class="form-control" id="fg" placeholder="e.g. 95" min="20" max="600" step="0.1">
+          <span class="input-group-text" id="fgUnit">mg/dL</span>
+        </div>
+        <div class="text-danger warn d-none" id="fgWarn">Enter a reasonable value (mg/dL 20–600 or mmol/L 1–33).</div>
+      </div>
+      <div class="col-12 col-md-6">
+        <label class="form-label fw-semibold">Fasting insulin</label>
+        <div class="input-group">
+          <input type="number" inputmode="decimal" class="form-control" id="fi" placeholder="e.g. 12" min="0.5" max="500" step="0.1">
+          <span class="input-group-text" id="fiUnit">µU/mL</span>
+        </div>
+        <div class="text-danger warn d-none" id="fiWarn">Enter a reasonable value (µU/mL 0.5–500 or pmol/L 3–3000).</div>
+      </div>
+    </div>
+
+    <div class="d-flex align-items-center gap-2 mt-3">
+      <button class="btn btn-sm btn-outline-secondary" id="copyFastingToOGTT">Copy fasting → OGTT 0 min</button>
+      <div class="unit-hint">Use if your OGTT “0 min” equals fasting.</div>
+    </div>
+
+    <hr class="my-4">
+
+    <!-- OGTT -->
+    <div class="d-flex align-items-center justify-content-between">
+      <h5 class="mb-0">OGTT values</h5>
+      <div class="form-check form-switch">
+        <input class="form-check-input" type="checkbox" id="useTwoPoint">
+        <label class="form-check-label" for="useTwoPoint">Use ISI(0,120) if only 0 & 120 available</label>
+      </div>
+    </div>
+
+    <div class="row g-3 mt-2">
+      <div class="col-6 col-md-3">
+        <label class="form-label fw-semibold">Glucose 0′</label>
+        <div class="input-group">
+          <input type="number" class="form-control" id="g0" step="0.1">
+          <span class="input-group-text" id="g0Unit">mg/dL</span>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <label class="form-label fw-semibold">Insulin 0′</label>
+        <div class="input-group">
+          <input type="number" class="form-control" id="i0" step="0.1">
+          <span class="input-group-text" id="i0Unit">µU/mL</span>
+        </div>
+      </div>
+
+      <div class="col-6 col-md-3">
+        <label class="form-label fw-semibold">Glucose 30′</label>
+        <div class="input-group">
+          <input type="number" class="form-control" id="g30" step="0.1">
+          <span class="input-group-text" id="g30Unit">mg/dL</span>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <label class="form-label fw-semibold">Insulin 30′</label>
+        <div class="input-group">
+          <input type="number" class="form-control" id="i30" step="0.1">
+          <span class="input-group-text" id="i30Unit">µU/mL</span>
+        </div>
+      </div>
+
+      <div class="col-6 col-md-3">
+        <label class="form-label fw-semibold">Glucose 60′</label>
+        <div class="input-group">
+          <input type="number" class="form-control" id="g60" step="0.1">
+          <span class="input-group-text" id="g60Unit">mg/dL</span>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <label class="form-label fw-semibold">Insulin 60′</label>
+        <div class="input-group">
+          <input type="number" class="form-control" id="i60" step="0.1">
+          <span class="input-group-text" id="i60Unit">µU/mL</span>
+        </div>
+      </div>
+
+      <div class="col-6 col-md-3">
+        <label class="form-label fw-semibold">Glucose 90′</label>
+        <div class="input-group">
+          <input type="number" class="form-control" id="g90" step="0.1">
+          <span class="input-group-text" id="g90Unit">mg/dL</span>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <label class="form-label fw-semibold">Insulin 90′</label>
+        <div class="input-group">
+          <input type="number" class="form-control" id="i90" step="0.1">
+          <span class="input-group-text" id="i90Unit">µU/mL</span>
+        </div>
+      </div>
+
+      <div class="col-6 col-md-3">
+        <label class="form-label fw-semibold">Glucose 120′</label>
+        <div class="input-group">
+          <input type="number" class="form-control" id="g120" step="0.1">
+          <span class="input-group-text" id="g120Unit">mg/dL</span>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <label class="form-label fw-semibold">Insulin 120′</label>
+        <div class="input-group">
+          <input type="number" class="form-control" id="i120" step="0.1">
+          <span class="input-group-text" id="i120Unit">µU/mL</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="unit-hint mt-2">Matsuda requires all 5 timepoints (0, 30, 60, 90, 120). If you only have 0 & 120, toggle ISI(0,120).</div>
+
+    <hr class="my-4">
+
+    <!-- Results -->
+    <h5 class="mb-2">Results</h5>
+    <div id="results" class="row g-3">
+      <div class="col-12 col-lg-6">
+        <div class="alert alert-info">
+          <div class="fw-semibold">HOMA-IR</div>
+          <div class="mono" id="homaIR">—</div>
+          <div class="unit-hint">Higher = more insulin resistant. Uses fasting glucose (mg/dL) & insulin (µU/mL).</div>
+        </div>
+      </div>
+      <div class="col-12 col-lg-6">
+        <div class="alert alert-info">
+          <div class="fw-semibold">HOMA-β</div>
+          <div class="mono" id="homaB">—</div>
+          <div class="unit-hint">β-cell function (%). Uses fasting glucose in mmol/L.</div>
+        </div>
+      </div>
+      <div class="col-12 col-lg-6">
+        <div class="alert alert-info">
+          <div class="fw-semibold">QUICKI</div>
+          <div class="mono" id="quicki">—</div>
+          <div class="unit-hint">Higher = better sensitivity. Uses log₁₀ of fasting insulin (µU/mL) and glucose (mg/dL).</div>
+        </div>
+      </div>
+      <div class="col-12 col-lg-6">
+        <div class="alert alert-info">
+          <div class="fw-semibold">Matsuda Index</div>
+          <div class="mono" id="matsuda">—</div>
+          <div class="unit-hint" id="matsudaNote">Requires all OGTT points (0–120). Higher = better sensitivity.</div>
+        </div>
+      </div>
+      <div class="col-12">
+        <div class="alert alert-secondary">
+          <div class="fw-semibold">ISI(0,120) (optional two-point)</div>
+          <div class="mono" id="isi0120">—</div>
+          <div class="unit-hint">10,000 / √(FPG×FPI×G120×I120) — shown if toggle is ON and data present.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="d-flex gap-2 mt-2">
+      <button class="btn btn-outline-secondary" id="resetBtn">Reset</button>
+      <button class="btn btn-outline-primary ms-auto" id="shareBtn">Share link</button>
+    </div>
+
+    <hr class="my-4">
+    <div class="unit-hint">
+      <strong>Notes on accuracy:</strong> All calculations internally convert to glucose mg/dL and insulin µU/mL for HOMA-IR/QUICKI and to glucose mmol/L for HOMA-β; Matsuda uses mg/dL and µU/mL. Conversions: glucose mmol/L = mg/dL × 0.0555; insulin pmol/L = µU/mL × 6.
+    </div>
+  </div>
+
+  <p class="text-center text-muted mt-3 mb-0"><small>© 2025 — Free, no data collected.</small></p>
+</div>
+
+<script>
+(function(){
+  // --- elements ---
+  const gMg = document.getElementById('g-mg');
+  const gMmol = document.getElementById('g-mmol');
+  const iUU = document.getElementById('i-uU');
+  const iPmol = document.getElementById('i-pmol');
+
+  const fg = document.getElementById('fg');
+  const fi = document.getElementById('fi');
+  const fgUnit = document.getElementById('fgUnit');
+  const fiUnit = document.getElementById('fiUnit');
+  const fgWarn = document.getElementById('fgWarn');
+  const fiWarn = document.getElementById('fiWarn');
+
+  const ids = ['g0','i0','g30','i30','g60','i60','g90','i90','g120','i120'];
+  const og = {}; ids.forEach(id=>og[id]=document.getElementById(id));
+  const unitLabels = {
+    g:['g0Unit','g30Unit','g60Unit','g90Unit','g120Unit'],
+    i:['i0Unit','i30Unit','i60Unit','i90Unit','i120Unit']
+  };
+  unitLabels.g.forEach(id=>document.getElementById(id).textContent='mg/dL');
+  unitLabels.i.forEach(id=>document.getElementById(id).textContent='µU/mL');
+
+  const copyBtn = document.getElementById('copyFastingToOGTT');
+  const useTwoPoint = document.getElementById('useTwoPoint');
+
+  const outIR = document.getElementById('homaIR');
+  const outB  = document.getElementById('homaB');
+  const outQ  = document.getElementById('quicki');
+  const outM  = document.getElementById('matsuda');
+  const outMnote = document.getElementById('matsudaNote');
+  const outISI = document.getElementById('isi0120');
+
+  const resetBtn = document.getElementById('resetBtn');
+  const shareBtn = document.getElementById('shareBtn');
+
+  // --- helpers ---
+  const toMg = (val, isMmol) => isMmol ? val*18.0 : val;           // glucose
+  const toMmol = (val, isMg) => isMg ? val/18.0 : val;
+  const toUU = (val, isPmol) => isPmol ? val/6.0 : val;            // insulin
+  const pos = v => v!==null && !isNaN(v) && v>0;
+  const num = el => { const v = parseFloat(el.value); return isNaN(v)?null:v; };
+
+  function updateUnitLabels(){
+    fgUnit.textContent = gMg.checked ? 'mg/dL' : 'mmol/L';
+    fiUnit.textContent = iUU.checked ? 'µU/mL' : 'pmol/L';
+    unitLabels.g.forEach(id=>document.getElementById(id).textContent=gMg.checked?'mg/dL':'mmol/L');
+    unitLabels.i.forEach(id=>document.getElementById(id).textContent=iUU.checked?'µU/mL':'pmol/L');
+    calculate();
+  }
+
+  function checkRanges(){
+    // fasting glucose
+    const g = num(fg);
+    const i = num(fi);
+    fgWarn.classList.add('d-none'); fiWarn.classList.add('d-none');
+
+    if(g!==null){
+      if(gMg.checked && (g<20 || g>600)) fgWarn.classList.remove('d-none');
+      if(gMmol.checked && (g<1 || g>33)) fgWarn.classList.remove('d-none');
+    }
+    if(i!==null){
+      if(iUU.checked && (i<0.5 || i>500)) fiWarn.classList.remove('d-none');
+      if(iPmol.checked && (i<3 || i>3000)) fiWarn.classList.remove('d-none');
+    }
+  }
+
+  function compute(){
+    // get fasting in standard units
+    const gF_raw = num(fg);
+    const iF_raw = num(fi);
+    const gF_mg = (gF_raw==null)?null : toMg(gF_raw, gMmol.checked);
+    const iF_uU = (iF_raw==null)?null : toUU(iF_raw, iPmol.checked);
+    const gF_mmol = (gF_mg==null)?null : gF_mg/18.0;
+
+    // HOMA-IR
+    if(pos(gF_mg) && pos(iF_uU)){
+      const homaIR = (iF_uU * gF_mg) / 405.0;
+      outIR.textContent = homaIR.toFixed(2);
+    } else outIR.textContent = '—';
+
+    // HOMA-β
+    if(pos(gF_mmol) && pos(iF_uU) && gF_mmol>3.5){
+      const homaB = (20.0 * iF_uU) / (gF_mmol - 3.5);
+      outB.textContent = homaB.toFixed(1) + ' %';
+    } else outB.textContent = '—';
+
+    // QUICKI
+    if(pos(gF_mg) && pos(iF_uU)){
+      const quicki = 1.0 / (Math.log10(iF_uU) + Math.log10(gF_mg));
+      outQ.textContent = quicki.toFixed(3);
+    } else outQ.textContent = '—';
+
+    // Matsuda (needs 0,30,60,90,120 — glucose mg/dL, insulin µU/mL)
+    const need = ['g0','i0','g30','i30','g60','i60','g90','i90','g120','i120'];
+    let haveAll = true;
+    let vals = {};
+    for(const id of need){
+      const v = num(og[id]);
+      if(v===null){ haveAll=false; break; }
+      if(id.startsWith('g')) vals[id] = toMg(v, gMmol.checked);
+      else vals[id] = toUU(v, iPmol.checked);
+      if(!pos(vals[id])) { haveAll=false; break; }
+    }
+    if(haveAll){
+      const FPG = vals.g0, FPI = vals.i0;
+      const Gmean = (vals.g0+vals.g30+vals.g60+vals.g90+vals.g120)/5.0;
+      const Imean = (vals.i0+vals.i30+vals.i60+vals.i90+vals.i120)/5.0;
+      const mats = 10000.0 / Math.sqrt((FPG*FPI)*(Gmean*Imean));
+      outM.textContent = mats.toFixed(2);
+      outMnote.textContent = 'Standard Matsuda using all 5 timepoints (0–120).';
+    } else {
+      outM.textContent = '—';
+      outMnote.textContent = 'Requires all OGTT points (0–120). If you only have 0 & 120, toggle ISI(0,120).';
+    }
+
+    // ISI(0,120) optional
+    const g0 = num(og.g0), i0 = num(og.i0), g120 = num(og.g120), i120 = num(og.i120);
+    if(useTwoPoint.checked && [g0,i0,g120,i120].every(v=>v!==null)){
+      const G0 = toMg(g0, gMmol.checked), I0 = toUU(i0, iPmol.checked);
+      const G120 = toMg(g120, gMmol.checked), I120 = toUU(i120, iPmol.checked);
+      if([G0,I0,G120,I120].every(v=>pos(v))){
+        const isi = 10000.0 / Math.sqrt(G0*I0*G120*I120);
+        outISI.textContent = isi.toFixed(2);
+      } else outISI.textContent = '—';
+    } else {
+      outISI.textContent = '—';
+    }
+  }
+
+  function calculate(){ checkRanges(); compute(); }
+
+  // events
+  [gMg,gMmol,iUU,iPmol,fg,fi,useTwoPoint].forEach(el=>{
+    el.addEventListener('input', calculate);
+    el.addEventListener('change', calculate);
+  });
+  Object.values(og).forEach(el=>{
+    el.addEventListener('input', calculate);
+    el.addEventListener('change', calculate);
+  });
+
+  document.getElementById('copyFastingToOGTT').addEventListener('click', ()=>{
+    if(fg.value) og.g0.value = fg.value;
+    if(fi.value) og.i0.value = fi.value;
+    calculate();
+  });
+
+  document.getElementById('resetBtn').addEventListener('click', ()=>{
+    [fg,fi].forEach(el=>el.value='');
+    Object.values(og).forEach(el=>el.value='');
+    useTwoPoint.checked=false;
+    gMg.checked=true; gMmol.checked=false;
+    iUU.checked=true; iPmol.checked=false;
+    updateUnitLabels();
+    calculate();
+  });
+
+  document.getElementById('shareBtn').addEventListener('click', async ()=>{
+    const url = location.origin ? (location.origin + location.pathname) : location.href;
+    const title = "Insulin Resistance Indices";
+    const text  = "HOMA-IR, HOMA-β, QUICKI, Matsuda (free).";
+    if(navigator.share){
+      try{ await navigator.share({title, text, url}); }catch(e){}
+    }else{
+      try{
+        await navigator.clipboard.writeText(url);
+        alert("Link copied:\n"+url);
+      }catch(e){
+        prompt("Copy this link:", url);
+      }
+    }
+  });
+
+  updateUnitLabels();
+  calculate();
+})();
+</script>
+</body>
+</html>
