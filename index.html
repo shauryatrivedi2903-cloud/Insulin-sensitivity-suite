@@ -3,101 +3,120 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Insulin Sensitivity Suite — HOMA-IR • HOMA-β • QUICKI • Matsuda • ISI(0,120)</title>
+<title>Insulin Sensitivity Suite v3 — HOMA, QUICKI, Matsuda, ISI(0,120)</title>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
 <style>
-  :root{
-    --bg:#f7fafc; --card:#ffffff; --muted:#6c757d; --border:#e6eaef;
-    --ok:#0c7a3b; --warn:#946200; --risk:#9d1c1c; --accent:#0d6efd;
+  :root {
+    --bg:#f5f8fb; --card:#ffffff; --border:#e1e5eb;
+    --muted:#6b7280; --accent:#1976d2;
+    --ok:#0d7a3a; --warn:#b57400; --risk:#b91c1c;
+    --softblue:#e8f1fb; --softgray:#f1f3f6;
   }
-  html,body{background:var(--bg); color:#1f2937}
-  .container-narrow{max-width:960px}
-  .card{border:1px solid var(--border); border-radius:14px}
-  .sticky-slab{position:sticky; top:0; z-index:20; background:#fff; border:1px solid var(--border);
-    border-radius:16px; padding:12px; box-shadow:0 2px 10px rgba(0,0,0,.04)}
-  .metric{padding:10px 12px; border-radius:12px; background:#f3f6fb; border:1px solid var(--border)}
-  .metric .label{font-size:.78rem; color:var(--muted); margin-bottom:2px}
-  .metric .value{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; font-size:1.06rem}
-  .metric .interp{font-size:.86rem}
-  .interp.ok{color:var(--ok)} .interp.border{color:var(--warn)} .interp.bad{color:var(--risk)}
-  .grid{display:grid; gap:.6rem}
-  @media (min-width:576px){ .grid.cols-2{grid-template-columns:1fr 1fr} }
-  @media (min-width:992px){ .grid.cols-5{grid-template-columns:repeat(5,1fr)} .grid.cols-2-lg{grid-template-columns:1fr 1fr} }
-  .section-title{font-weight:600; margin-bottom:.35rem}
-  .unit-note{font-size:.85rem; color:var(--muted)}
-  .form-label{margin-bottom:.25rem}
-  .btn-toggle .btn{border-radius:10px}
-  .muted{color:var(--muted)}
-  .small-note{font-size:.86rem; color:var(--muted)}
-  .actions-row{gap:.5rem}
+
+  body {
+    background: var(--bg);
+    color: #1f2937;
+    font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+
+  .container-narrow { max-width: 960px; }
+
+  .header-bar {
+    background: linear-gradient(90deg, var(--accent) 0%, #2b8eed 100%);
+    color: white;
+    border-radius: 12px;
+    padding: 1rem 1.25rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  }
+
+  .header-bar h3 {
+    font-size: 1.25rem;
+    margin-bottom: 0.2rem;
+  }
+
+  .jump-btn {
+    background: #ffffff;
+    color: var(--accent);
+    border: none;
+    font-weight: 600;
+    border-radius: 30px;
+    padding: 0.35rem 0.9rem;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  }
+
+  .card {
+    background: var(--card);
+    border-radius: 14px;
+    border: 1px solid var(--border);
+    box-shadow: 0 1px 4px rgba(0,0,0,0.03);
+  }
+
+  .section-title {
+    font-weight: 600;
+    color: var(--accent);
+    margin-bottom: .5rem;
+  }
+
+  .unit-note { font-size: 0.85rem; color: var(--muted); }
+  .interp { font-weight: 500; }
+  .interp.ok { color: var(--ok); }
+  .interp.border { color: var(--warn); }
+  .interp.bad { color: var(--risk); }
+
+  .result-list li {
+    background: var(--softgray);
+    border-radius: 10px;
+    padding: .6rem .8rem;
+    margin-bottom: .5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+  }
+
+  .result-list li span.label { font-weight: 600; color: var(--accent); }
+
+  .footer-note {
+    font-size: 0.85rem;
+    color: var(--muted);
+    text-align: center;
+    margin-top: 1rem;
+  }
+
+  .btn-outline-primary { border-color: var(--accent); color: var(--accent); }
+  .btn-outline-primary:hover { background: var(--accent); color: #fff; }
+
 </style>
 </head>
+
 <body>
 <div class="container container-narrow my-3 my-sm-4">
 
-  <!-- Sticky results -->
-  <div class="sticky-slab mb-3">
-    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
-      <div class="d-flex align-items-center gap-2">
-        <strong>Results</strong>
-        <span class="muted">Auto-updates as you type</span>
-      </div>
-      <div class="d-flex actions-row">
-        <button id="shareBtn" class="btn btn-sm btn-outline-primary">Share link</button>
-        <button id="resetBtn" class="btn btn-sm btn-outline-secondary">Reset</button>
-      </div>
+  <div class="header-bar d-flex align-items-center justify-content-between flex-wrap">
+    <div>
+      <h3>Insulin Sensitivity Suite v3</h3>
+      <div style="font-size:0.9rem; opacity:0.9;">HOMA-IR • HOMA-β • QUICKI • Matsuda • ISI(0,120)</div>
     </div>
-    <div class="grid cols-5 mt-2">
-      <div class="metric">
-        <div class="label">HOMA-IR</div>
-        <div class="value" id="outHomaIR">—</div>
-        <div class="interp" id="intHomaIR">—</div>
-      </div>
-      <div class="metric">
-        <div class="label">HOMA-β (%)</div>
-        <div class="value" id="outHomaB">—</div>
-        <div class="interp" id="intHomaB">—</div>
-      </div>
-      <div class="metric">
-        <div class="label">QUICKI</div>
-        <div class="value" id="outQuicki">—</div>
-        <div class="interp" id="intQuicki">—</div>
-      </div>
-      <div class="metric">
-        <div class="label">Matsuda Index</div>
-        <div class="value" id="outMatsuda">—</div>
-        <div class="interp" id="intMatsuda">Needs OGTT</div>
-      </div>
-      <div class="metric">
-        <div class="label">ISI(0,120)</div>
-        <div class="value" id="outISI">—</div>
-        <div class="interp" id="intISI">Needs 0′ & 120′</div>
-      </div>
-    </div>
-    <div class="small-note mt-2">
-      Interpretations reflect commonly cited adult ranges; thresholds vary by population/assay. Use clinical judgment.
-    </div>
+    <button id="scrollResults" class="jump-btn mt-2 mt-sm-0">▼ View Results</button>
   </div>
 
-  <!-- Fasting inputs -->
-  <div class="card p-3 p-sm-4 mb-3">
-    <div class="section-title">Fasting values</div>
-    <div class="row g-3 align-items-end">
+  <!-- Fasting values -->
+  <div class="card p-3 p-sm-4 mt-3 mb-3">
+    <div class="section-title">Fasting Values</div>
+    <div class="row g-3">
       <div class="col-12 col-sm-6">
         <label class="form-label">Fasting glucose</label>
         <div class="input-group">
-          <input id="fg" class="form-control" type="number" inputmode="decimal" placeholder="e.g., 92" min="20" max="600" step="0.1">
+          <input id="fg" type="number" class="form-control" inputmode="decimal" placeholder="e.g., 92">
           <span class="input-group-text" id="fgUnit">mg/dL</span>
         </div>
-        <div class="unit-note">Toggle units below if needed</div>
       </div>
       <div class="col-12 col-sm-6">
         <label class="form-label">Fasting insulin</label>
         <div class="input-group">
-          <input id="fi" class="form-control" type="number" inputmode="decimal" placeholder="e.g., 10" min="0.5" max="500" step="0.1">
+          <input id="fi" type="number" class="form-control" inputmode="decimal" placeholder="e.g., 10">
           <span class="input-group-text" id="fiUnit">µU/mL</span>
         </div>
-        <div class="unit-note">Toggle units below if needed</div>
       </div>
     </div>
 
@@ -105,7 +124,7 @@
     <div class="row g-3 mt-3">
       <div class="col-12 col-sm-6">
         <div class="form-label">Glucose units</div>
-        <div class="btn-group w-100 btn-toggle" role="group">
+        <div class="btn-group w-100" role="group">
           <input type="radio" class="btn-check" name="gunit" id="g-mg" checked>
           <label class="btn btn-outline-primary" for="g-mg">mg/dL</label>
           <input type="radio" class="btn-check" name="gunit" id="g-mmol">
@@ -114,335 +133,178 @@
       </div>
       <div class="col-12 col-sm-6">
         <div class="form-label">Insulin units</div>
-        <div class="btn-group w-100 btn-toggle" role="group">
+        <div class="btn-group w-100" role="group">
           <input type="radio" class="btn-check" name="iunit" id="i-uU" checked>
           <label class="btn btn-outline-primary" for="i-uU">µU/mL</label>
           <input type="radio" class="btn-check" name="iunit" id="i-pmol">
           <label class="btn btn-outline-primary" for="i-pmol">pmol/L</label>
         </div>
-        <div class="unit-note mt-1">1 µU/mL ≈ 6 pmol/L (human insulin).</div>
+        <div class="unit-note mt-1">1 µU/mL ≈ 6 pmol/L (human insulin)</div>
       </div>
     </div>
   </div>
 
-  <!-- OGTT block -->
+  <!-- OGTT section -->
   <div class="card p-3 p-sm-4 mb-3">
-    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
-      <div class="section-title mb-0">OGTT values (optional)</div>
-      <div class="d-flex actions-row">
+    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-2">
+      <div class="section-title mb-0">OGTT Values (Optional)</div>
+      <div class="d-flex gap-2 flex-wrap">
         <button id="copyFasting" class="btn btn-sm btn-outline-secondary">Copy fasting → 0′</button>
         <button id="clearOGTT" class="btn btn-sm btn-outline-secondary">Clear OGTT</button>
       </div>
     </div>
-    <div class="unit-note mb-2">Enter glucose & insulin at 0′, 30′, 60′, 90′, 120′. Missing any value disables Matsuda. ISI(0,120) needs only 0′ and 120′.</div>
-
-    <div class="grid cols-2 cols-2-lg">
-      <!-- 0' -->
-      <div>
+    <div class="form-check form-switch mb-3">
+      <input class="form-check-input" type="checkbox" role="switch" id="enableISI">
+      <label class="form-check-label" for="enableISI">Enable ISI(0,120) Calculation</label>
+    </div>
+    <div class="row g-3">
+      <div class="col-6 col-md-3">
         <label class="form-label">Glucose 0′</label>
-        <div class="input-group">
-          <input id="g0" class="form-control" type="number" inputmode="decimal" step="0.1">
-          <span class="input-group-text" id="g0Unit">mg/dL</span>
-        </div>
+        <input id="g0" type="number" class="form-control" inputmode="decimal">
       </div>
-      <div>
+      <div class="col-6 col-md-3">
         <label class="form-label">Insulin 0′</label>
-        <div class="input-group">
-          <input id="i0" class="form-control" type="number" inputmode="decimal" step="0.1">
-          <span class="input-group-text" id="i0Unit">µU/mL</span>
-        </div>
+        <input id="i0" type="number" class="form-control" inputmode="decimal">
       </div>
-
-      <!-- 30' -->
-      <div>
+      <div class="col-6 col-md-3">
         <label class="form-label">Glucose 30′</label>
-        <div class="input-group">
-          <input id="g30" class="form-control" type="number" inputmode="decimal" step="0.1">
-          <span class="input-group-text" id="g30Unit">mg/dL</span>
-        </div>
+        <input id="g30" type="number" class="form-control" inputmode="decimal">
       </div>
-      <div>
+      <div class="col-6 col-md-3">
         <label class="form-label">Insulin 30′</label>
-        <div class="input-group">
-          <input id="i30" class="form-control" type="number" inputmode="decimal" step="0.1">
-          <span class="input-group-text" id="i30Unit">µU/mL</span>
-        </div>
+        <input id="i30" type="number" class="form-control" inputmode="decimal">
       </div>
-
-      <!-- 60' -->
-      <div>
+      <div class="col-6 col-md-3">
         <label class="form-label">Glucose 60′</label>
-        <div class="input-group">
-          <input id="g60" class="form-control" type="number" inputmode="decimal" step="0.1">
-          <span class="input-group-text" id="g60Unit">mg/dL</span>
-        </div>
+        <input id="g60" type="number" class="form-control" inputmode="decimal">
       </div>
-      <div>
+      <div class="col-6 col-md-3">
         <label class="form-label">Insulin 60′</label>
-        <div class="input-group">
-          <input id="i60" class="form-control" type="number" inputmode="decimal" step="0.1">
-          <span class="input-group-text" id="i60Unit">µU/mL</span>
-        </div>
+        <input id="i60" type="number" class="form-control" inputmode="decimal">
       </div>
-
-      <!-- 90' -->
-      <div>
+      <div class="col-6 col-md-3">
         <label class="form-label">Glucose 90′</label>
-        <div class="input-group">
-          <input id="g90" class="form-control" type="number" inputmode="decimal" step="0.1">
-          <span class="input-group-text" id="g90Unit">mg/dL</span>
-        </div>
+        <input id="g90" type="number" class="form-control" inputmode="decimal">
       </div>
-      <div>
+      <div class="col-6 col-md-3">
         <label class="form-label">Insulin 90′</label>
-        <div class="input-group">
-          <input id="i90" class="form-control" type="number" inputmode="decimal" step="0.1">
-          <span class="input-group-text" id="i90Unit">µU/mL</span>
-        </div>
+        <input id="i90" type="number" class="form-control" inputmode="decimal">
       </div>
-
-      <!-- 120' -->
-      <div>
+      <div class="col-6 col-md-3">
         <label class="form-label">Glucose 120′</label>
-        <div class="input-group">
-          <input id="g120" class="form-control" type="number" inputmode="decimal" step="0.1">
-          <span class="input-group-text" id="g120Unit">mg/dL</span>
-        </div>
+        <input id="g120" type="number" class="form-control" inputmode="decimal">
       </div>
-      <div>
+      <div class="col-6 col-md-3">
         <label class="form-label">Insulin 120′</label>
-        <div class="input-group">
-          <input id="i120" class="form-control" type="number" inputmode="decimal" step="0.1">
-          <span class="input-group-text" id="i120Unit">µU/mL</span>
-        </div>
+        <input id="i120" type="number" class="form-control" inputmode="decimal">
       </div>
     </div>
   </div>
 
-  <!-- Reference card -->
-  <div class="card p-3 p-sm-4">
-    <div class="section-title">Reference & interpretation (commonly used adult ranges)</div>
-    <div class="row">
-      <div class="col-12 col-lg-6">
-        <ul class="mb-2">
-          <li><strong>HOMA-IR</strong>: &lt;2.0 = insulin-sensitive; 2.0–2.5 = borderline; &gt;2.5 = insulin-resistant.</li>
-          <li><strong>HOMA-β</strong> (%): ~100% ≈ typical; &lt;60% = decreased β-cell; 60–140% ≈ normal; &gt;140% = hyperinsulinemic response.</li>
-          <li><strong>QUICKI</strong>: &gt;0.33 = normal sensitivity; 0.30–0.33 = borderline; &lt;0.30 = insulin-resistant.</li>
-          <li><strong>Matsuda Index</strong>: &gt;4 = normal sensitivity; 2.5–4 = impaired; &lt;2.5 = insulin-resistant.</li>
-          <li><strong>ISI(0,120)</strong>: &gt;4.3 = normal; 2.9–4.3 = impaired; &lt;2.9 = insulin-resistant.</li>
-        </ul>
-      </div>
-      <div class="col-12 col-lg-6">
-        <div class="small-note">
-          Notes: Cutoffs vary with population/assay; use alongside history, exam, and other labs. Glucose assumed mg/dL, insulin µU/mL (internal conversions applied).
-        </div>
-      </div>
-    </div>
+  <!-- Results -->
+  <div id="results" class="card p-3 p-sm-4 mb-3">
+    <div class="section-title">Results & Interpretation</div>
+    <ul id="resultList" class="result-list list-unstyled mb-0"></ul>
   </div>
 
-  <p class="text-center muted mt-3 mb-4"><small>© 2025 — Insulin Sensitivity Suite. No data stored.</small></p>
+  <div class="footer-note">
+    © 2025 Insulin Sensitivity Suite — Auto-calculating, no data stored.<br>
+    Interpretations are approximate; use clinical context.
+  </div>
 </div>
 
 <script>
 (function(){
-  // --- elements ---
-  const gMg = document.getElementById('g-mg');
-  const gMmol = document.getElementById('g-mmol');
-  const iUU = document.getElementById('i-uU');
-  const iPmol = document.getElementById('i-pmol');
+  const fg=document.getElementById('fg'), fi=document.getElementById('fi');
+  const gEls=['g0','g30','g60','g90','g120'].map(id=>document.getElementById(id));
+  const iEls=['i0','i30','i60','i90','i120'].map(id=>document.getElementById(id));
+  const gMg=document.getElementById('g-mg'), gMmol=document.getElementById('g-mmol');
+  const iUU=document.getElementById('i-uU'), iPmol=document.getElementById('i-pmol');
+  const enableISI=document.getElementById('enableISI');
+  const list=document.getElementById('resultList');
+  const scrollBtn=document.getElementById('scrollResults');
 
-  const fg = document.getElementById('fg'); const fi = document.getElementById('fi');
-  const fgUnit = document.getElementById('fgUnit'); const fiUnit = document.getElementById('fiUnit');
+  const toMG=(v)=>gMmol.checked?v*18:v;
+  const toUU=(v)=>iPmol.checked?v/6:v;
 
-  const gIds = ['g0','g30','g60','g90','g120'];
-  const iIds = ['i0','i30','i60','i90','i120'];
-  const gEls = {}; gIds.forEach(id=>gEls[id]=document.getElementById(id));
-  const iEls = {}; iIds.forEach(id=>iEls[id]=document.getElementById(id));
+  const pos=(v)=>v!=null&&!isNaN(v)&&v>0;
+  const val=(el)=>parseFloat(el.value)||null;
 
-  const gUnitEls = ['g0Unit','g30Unit','g60Unit','g90Unit','g120Unit'].map(id=>document.getElementById(id));
-  const iUnitEls = ['i0Unit','i30Unit','i60Unit','i90Unit','i120Unit'].map(id=>document.getElementById(id));
+  function interp(txt,cls){return `<span class="interp ${cls}">${txt}</span>`;}
 
-  const outIR=document.getElementById('outHomaIR'),
-        outB=document.getElementById('outHomaB'),
-        outQ=document.getElementById('outQuicki'),
-        outM=document.getElementById('outMatsuda'),
-        outISI=document.getElementById('outISI');
+  function interpretHOMAIR(v){if(!pos(v))return["—",""];
+    if(v<2)return["Insulin-sensitive","ok"];
+    if(v<=2.5)return["Borderline","border"];
+    return["Insulin-resistant","bad"];}
 
-  const intIR=document.getElementById('intHomaIR'),
-        intB=document.getElementById('intHomaB'),
-        intQ=document.getElementById('intQuicki'),
-        intM=document.getElementById('intMatsuda'),
-        intISI=document.getElementById('intISI');
+  function interpretHOMAB(v){if(!pos(v))return["—",""];
+    if(v<60)return["Decreased β-cell","bad"];
+    if(v<=140)return["~Normal","ok"];
+    return["Hyperinsulinemic","border"];}
 
-  const copyBtn=document.getElementById('copyFasting'),
-        clearOGTT=document.getElementById('clearOGTT'),
-        resetBtn=document.getElementById('resetBtn'),
-        shareBtn=document.getElementById('shareBtn');
+  function interpretQUICKI(v){if(!pos(v))return["—",""];
+    if(v>0.33)return["Normal","ok"];
+    if(v>=0.30)return["Borderline","border"];
+    return["Resistant","bad"];}
 
-  // --- helpers ---
-  const num = el => { const v=parseFloat(el.value); return isNaN(v)?null:v; };
-  const pos = v => v!==null && v>0;
+  function interpretMatsuda(v){if(!pos(v))return["—",""];
+    if(v>4)return["Normal","ok"];
+    if(v>=2.5)return["Impaired","border"];
+    return["Resistant","bad"];}
 
-  // conversions
-  const G_to_mg   = (v,isMmol)=> isMmol? v*18.0 : v;
-  const G_to_mmol = (v,isMg)=> isMg? v/18.0 : v;
-  const I_to_uU   = (v,isPmol)=> isPmol? v/6.0 : v;
-
-  function updateUnitLabels(){
-    const gLab = gMg.checked?'mg/dL':'mmol/L';
-    const iLab = iUU.checked?'µU/mL':'pmol/L';
-    fgUnit.textContent=gLab; fiUnit.textContent=iLab;
-    gUnitEls.forEach(el=>el.textContent=gLab);
-    iUnitEls.forEach(el=>el.textContent=iLab);
-    calculate();
-  }
-
-  // interpretations (commonly cited adult ranges)
-  function interpretHOMAIR(v){ if(!pos(v)) return {t:'—',c:''};
-    if(v<2.0) return {t:'Insulin-sensitive',c:'ok'};
-    if(v<=2.5) return {t:'Borderline',c:'border'};
-    return {t:'Insulin-resistant',c:'bad'}; }
-
-  function interpretHOMAB(v){ if(!pos(v)) return {t:'—',c:''};
-    if(v<60) return {t:'Decreased β-cell',c:'bad'};
-    if(v<=140) return {t:'~Normal',c:'ok'};
-    return {t:'Hyperinsulinemic response',c:'border'}; }
-
-  function interpretQUICKI(v){ if(!pos(v)) return {t:'—',c:''};
-    if(v>0.33) return {t:'Normal sensitivity',c:'ok'};
-    if(v>=0.30) return {t:'Borderline',c:'border'};
-    return {t:'Insulin-resistant',c:'bad'}; }
-
-  function interpretMatsuda(v){ if(!pos(v)) return {t:'Needs OGTT',c:''};
-    if(v>4) return {t:'Normal sensitivity',c:'ok'};
-    if(v>=2.5) return {t:'Impaired',c:'border'};
-    return {t:'Insulin-resistant',c:'bad'}; }
-
-  function interpretISI(v){ if(!pos(v)) return {t:'Needs 0′ & 120′',c:''};
-    if(v>4.3) return {t:'Normal sensitivity',c:'ok'};
-    if(v>=2.9) return {t:'Impaired',c:'border'};
-    return {t:'Insulin-resistant',c:'bad'}; }
-
-  // local save/restore
-  function saveState(){
-    const state = {
-      fg:fg.value, fi:fi.value, gUnit:gMg.checked?'mg':'mmol', iUnit:iUU.checked?'uU':'pmol',
-      g0:gEls.g0.value, g30:gEls.g30.value, g60:gEls.g60.value, g90:gEls.g90.value, g120:gEls.g120.value,
-      i0:iEls.i0.value, i30:iEls.i30.value, i60:iEls.i60.value, i90:iEls.i90.value, i120:iEls.i120.value
-    };
-    localStorage.setItem('iss_state', JSON.stringify(state));
-  }
-  function loadState(){
-    try{
-      const s = JSON.parse(localStorage.getItem('iss_state')||'{}');
-      if(s.gUnit==='mmol'){ gMmol.checked=true; gMg.checked=false; }
-      if(s.iUnit==='pmol'){ iPmol.checked=true; iUU.checked=false; }
-      ['fg','fi'].forEach(k=>{ if(s[k]) document.getElementById(k).value=s[k]; });
-      ['g0','g30','g60','g90','g120'].forEach(k=>{ if(s[k]) gEls[k].value=s[k]; });
-      ['i0','i30','i60','i90','i120'].forEach(k=>{ if(s[k]) iEls[k].value=s[k]; });
-    }catch(e){}
-  }
+  function interpretISI(v){if(!pos(v))return["—",""];
+    if(v>4.3)return["Normal","ok"];
+    if(v>=2.9)return["Impaired","border"];
+    return["Resistant","bad"];}
 
   function compute(){
-    // fasting canonical units
-    const gRaw=num(fg), iRaw=num(fi);
-    const g_mg = (gRaw==null)?null:G_to_mg(gRaw, gMmol.checked);
-    const i_uU = (iRaw==null)?null:I_to_uU(iRaw, iPmol.checked);
-    const g_mmol = (g_mg==null)?null:g_mg/18.0;
-
-    // HOMA-IR
-    if(pos(g_mg)&&pos(i_uU)){
-      const val=(i_uU*g_mg)/405.0; outIR.textContent=val.toFixed(2);
-      const it=interpretHOMAIR(val); intIR.textContent=it.t; intIR.className='interp '+it.c;
-    } else { outIR.textContent='—'; intIR.textContent='—'; intIR.className='interp'; }
-
-    // HOMA-β
-    if(pos(i_uU)&&pos(g_mmol)&&g_mmol>3.5){
-      const val=(20.0*i_uU)/(g_mmol-3.5); outB.textContent=val.toFixed(1);
-      const it=interpretHOMAB(val); intB.textContent=it.t; intB.className='interp '+it.c;
-    } else { outB.textContent='—'; intB.textContent='—'; intB.className='interp'; }
-
-    // QUICKI
-    if(pos(i_uU)&&pos(g_mg)){
-      const val=1.0/(Math.log10(i_uU)+Math.log10(g_mg)); outQ.textContent=val.toFixed(3);
-      const it=interpretQUICKI(val); intQ.textContent=it.t; intQ.className='interp '+it.c;
-    } else { outQ.textContent='—'; intQ.textContent='—'; intQ.className='interp'; }
-
-    // Matsuda (needs all OGTT points)
-    const allG = gIds.map(id=>num(gEls[id])).map(v=>v==null?null:G_to_mg(v, gMmol.checked));
-    const allI = iIds.map(id=>num(iEls[id])).map(v=>v==null?null:I_to_uU(v, iPmol.checked));
-    const haveAll = allG.every(v=>pos(v)) && allI.every(v=>pos(v));
-    if(haveAll && pos(g_mg)&&pos(i_uU)){
-      const Gmean=allG.reduce((a,b)=>a+b,0)/allG.length;
-      const Imean=allI.reduce((a,b)=>a+b,0)/allI.length;
-      const val=10000.0/Math.sqrt((g_mg*i_uU)*(Gmean*Imean));
-      outM.textContent=val.toFixed(2);
-      const it=interpretMatsuda(val); intM.textContent=it.t; intM.className='interp '+it.c;
-    } else { outM.textContent='—'; intM.textContent='Needs OGTT'; intM.className='interp'; }
-
-    // ISI(0,120) (needs 0' and 120')
-    const G0=num(gEls.g0), I0=num(iEls.i0), G120=num(gEls.g120), I120=num(iEls.i120);
-    if([G0,I0,G120,I120].every(v=>v!==null)){
-      const g0_mg=G_to_mg(G0, gMmol.checked), i0_uU=I_to_uU(I0, iPmol.checked);
-      const g120_mg=G_to_mg(G120, gMmol.checked), i120_uU=I_to_uU(I120, iPmol.checked);
-      if([g0_mg,i0_uU,g120_mg,i120_uU].every(v=>pos(v))){
-        const val=10000.0/Math.sqrt((g0_mg*i0_uU)*(g120_mg*i120_uU));
-        outISI.textContent=val.toFixed(2);
-        const it=interpretISI(val); intISI.textContent=it.t; intISI.className='interp '+it.c;
-      } else { outISI.textContent='—'; intISI.textContent='Needs 0′ & 120′'; intISI.className='interp'; }
-    } else { outISI.textContent='—'; intISI.textContent='Needs 0′ & 120′'; intISI.className='interp'; }
-
-    saveState();
+    list.innerHTML="";
+    const g=toMG(val(fg)), i=toUU(val(fi));
+    const gmmol=g/18;
+    if(pos(g)&&pos(i)){
+      const hIR=(i*g)/405; const [tIR,cIR]=interpretHOMAIR(hIR);
+      list.innerHTML+=`<li><span class="label">HOMA-IR:</span> ${hIR.toFixed(2)} ${interp(tIR,cIR)}</li>`;
+      const hB=(20*i)/(gmmol-3.5); const [tB,cB]=interpretHOMAB(hB);
+      list.innerHTML+=`<li><span class="label">HOMA-β (%):</span> ${hB.toFixed(1)} ${interp(tB,cB)}</li>`;
+      const q=1/(Math.log10(i)+Math.log10(g)); const [tQ,cQ]=interpretQUICKI(q);
+      list.innerHTML+=`<li><span class="label">QUICKI:</span> ${q.toFixed(3)} ${interp(tQ,cQ)}</li>`;
+    }
+    const G=gEls.map(e=>toMG(val(e))), I=iEls.map(e=>toUU(val(e)));
+    if(G.every(pos)&&I.every(pos)&&pos(g)&&pos(i)){
+      const Gmean=G.reduce((a,b)=>a+b,0)/G.length;
+      const Imean=I.reduce((a,b)=>a+b,0)/I.length;
+      const m=10000/Math.sqrt((g*i)*(Gmean*Imean));
+      const [t,c]=interpretMatsuda(m);
+      list.innerHTML+=`<li><span class="label">Matsuda Index:</span> ${m.toFixed(2)} ${interp(t,c)}</li>`;
+    }
+    if(enableISI.checked){
+      const g0=toMG(val(gEls[0])), i0=toUU(val(iEls[0]));
+      const g120=toMG(val(gEls[4])), i120=toUU(val(iEls[4]));
+      if([g0,i0,g120,i120].every(pos)){
+        const isi=10000/Math.sqrt((g0*i0)*(g120*i120));
+        const [t,c]=interpretISI(isi);
+        list.innerHTML+=`<li><span class="label">ISI(0,120):</span> ${isi.toFixed(2)} ${interp(t,c)}</li>`;
+      }
+    }
+    if(!list.innerHTML) list.innerHTML="<li><em>No sufficient data to compute indices yet.</em></li>";
   }
 
-  function calculate(){ compute(); }
+  document.querySelectorAll("input").forEach(el=>el.addEventListener("input",compute));
+  document.querySelectorAll("input[type=radio]").forEach(el=>el.addEventListener("change",compute));
+  enableISI.addEventListener("change",compute);
 
-  function setListeners(arr){ arr.forEach(el=>{
-    el.addEventListener('input', calculate);
-    el.addEventListener('change', calculate);
-  }); }
+  scrollBtn.onclick=()=>document.getElementById("results").scrollIntoView({behavior:"smooth"});
 
-  // events
-  setListeners([fg,fi,gMg,gMmol,iUU,iPmol]);
-  setListeners(Object.values(gEls));
-  setListeners(Object.values(iEls));
+  document.getElementById("copyFasting").onclick=()=>{
+    if(fg.value) document.getElementById("g0").value=fg.value;
+    if(fi.value) document.getElementById("i0").value=fi.value;
+    compute();
+  };
+  document.getElementById("clearOGTT").onclick=()=>{
+    gEls.forEach(e=>e.value=""); iEls.forEach(e=>e.value=""); compute();
+  };
 
-  document.getElementById('copyFasting').addEventListener('click', ()=>{
-    if(fg.value) gEls.g0.value=fg.value;
-    if(fi.value) iEls.i0.value=fi.value;
-    calculate();
-  });
-
-  document.getElementById('clearOGTT').addEventListener('click', ()=>{
-    Object.values(gEls).forEach(e=>e.value='');
-    Object.values(iEls).forEach(e=>e.value='');
-    calculate();
-  });
-
-  resetBtn.addEventListener('click', ()=>{
-    [fg,fi].forEach(e=>e.value='');
-    Object.values(gEls).forEach(e=>e.value='');
-    Object.values(iEls).forEach(e=>e.value='');
-    gMg.checked=true; gMmol.checked=false; iUU.checked=true; iPmol.checked=false;
-    localStorage.removeItem('iss_state');
-    updateUnitLabels(); calculate();
-  });
-
-  shareBtn.addEventListener('click', async ()=>{
-    const url = location.origin ? (location.origin + location.pathname) : location.href;
-    const title="Insulin Sensitivity Suite";
-    const text="HOMA-IR, HOMA-β, QUICKI, Matsuda, ISI(0,120) — mobile web calculator.";
-    if(navigator.share){ try{ await navigator.share({title,text,url}); }catch(e){} }
-    else{
-      try{ await navigator.clipboard.writeText(url); alert("Link copied:\n"+url); }
-      catch(e){ prompt("Copy this link:", url); }
-    }
-  });
-
-  // init
-  loadState();
-  updateUnitLabels();
-  calculate();
+  compute();
 })();
 </script>
 </body>
