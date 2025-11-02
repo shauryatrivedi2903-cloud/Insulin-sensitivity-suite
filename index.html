@@ -6,56 +6,63 @@
 <title>Insulin Sensitivity Suite</title>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 <style>
-  :root{
-    --bg:#f3f4f6;--card:#ffffff;--border:#e3e6eb;
-    --text:#1f2937;--muted:#6b7280;--accent:#16827a;
-    --ok:#198754;--warn:#d39e00;--risk:#dc3545;
-    --badge-ok:#d1e7dd;--badge-warn:#fff3cd;--badge-risk:#f8d7da;
-  }
-  body{background:var(--bg);color:var(--text);font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;}
-  .container-narrow{max-width:960px}
-  .header-bar{
-    background:linear-gradient(180deg,#fafafa 0%,#f1f3f6 100%);
-    border:1px solid var(--border);border-radius:14px;padding:16px 18px;
-    box-shadow:0 2px 6px rgba(0,0,0,.03);
-  }
-  .header-title{font-size:1.3rem;font-weight:700;margin:0;color:var(--accent);}
-  .header-sub{font-size:.92rem;color:var(--muted);}
-  .jump-btn{background:var(--accent);color:#fff;border:none;font-weight:600;
-    border-radius:999px;padding:.45rem .95rem;box-shadow:0 6px 14px rgba(22,130,122,.2);}
-  .card{background:var(--card);border:1px solid var(--border);
-    border-radius:14px;box-shadow:0 1px 4px rgba(0,0,0,.03);}
-  .section-title{font-weight:700;color:var(--accent);margin-bottom:.5rem;}
-  .result-list{list-style:none;padding:0;margin:0;}
-  .result-list li{display:flex;justify-content:space-between;align-items:center;
-    border:1px solid var(--border);border-radius:12px;padding:.6rem .8rem;margin:.4rem 0;}
-  .label{font-weight:600;color:var(--accent);}
-  .value{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;}
-  .badge-int{font-size:.8rem;font-weight:600;border-radius:10px;padding:.2rem .6rem;color:#212529;}
-  .ok{background:var(--badge-ok);color:var(--ok);}
-  .border{background:var(--badge-warn);color:var(--warn);}
-  .bad{background:var(--badge-risk);color:var(--risk);}
-  .footer-note{font-size:.85rem;color:var(--muted);}
-  .table th{color:var(--accent);}
-  .input-group-text{background:#eef2f7;border-color:var(--border);}
-  .form-control:focus{border-color:#8fd4ce;box-shadow:0 0 0 .2rem rgba(22,130,122,.15);}
+:root{
+  --bg:#f3f4f6;--card:#ffffff;--border:#e3e6eb;
+  --text:#1f2937;--muted:#6b7280;--accent:#16827a;
+  --ok:#198754;--warn:#d39e00;--risk:#dc3545;
+  --badge-ok:#d1e7dd;--badge-warn:#fff3cd;--badge-risk:#f8d7da;
+}
+body{background:var(--bg);color:var(--text);
+  font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;}
+.container-narrow{max-width:960px}
+.header-bar{background:linear-gradient(180deg,#fafafa 0%,#f1f3f6 100%);
+  border:1px solid var(--border);border-radius:14px;padding:16px 18px;
+  box-shadow:0 2px 6px rgba(0,0,0,.03);}
+.header-title{font-size:1.3rem;font-weight:700;margin:0;color:var(--accent);}
+.header-sub{font-size:.92rem;color:var(--muted);}
+.scroll-btn{background:var(--accent);color:#fff;border:none;font-weight:600;
+  border-radius:999px;padding:.4rem .9rem;box-shadow:0 4px 12px rgba(22,130,122,.2);
+  font-size:.9rem;}
+.ready-text{margin-left:.6rem;font-size:.9rem;font-style:italic;
+  color:#4b635c;opacity:0;transition:opacity .2s ease;}
+.ready-text.show{opacity:1;}
+.card{background:var(--card);border:1px solid var(--border);
+  border-radius:14px;box-shadow:0 1px 4px rgba(0,0,0,.03);}
+.section-title{font-weight:700;color:var(--accent);margin-bottom:.5rem;}
+.result-list{list-style:none;padding:0;margin:0;}
+.result-list li{display:flex;justify-content:space-between;align-items:center;
+  border:1px solid var(--border);border-radius:12px;padding:.6rem .8rem;margin:.4rem 0;}
+.label{font-weight:600;color:var(--accent);}
+.value{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;}
+.badge-int{font-size:.8rem;font-weight:600;border-radius:10px;
+  padding:.2rem .6rem;color:#212529;}
+.ok{background:var(--badge-ok);color:var(--ok);}
+.border{background:var(--badge-warn);color:var(--warn);}
+.bad{background:var(--badge-risk);color:var(--risk);}
+.footer-note{font-size:.85rem;color:var(--muted);}
+.table th{color:var(--accent);}
+.input-group-text{background:#eef2f7;border-color:var(--border);}
+.form-control:focus{border-color:#8fd4ce;box-shadow:0 0 0 .2rem rgba(22,130,122,.15);}
 </style>
 </head>
 <body>
 <div class="container container-narrow my-3 my-sm-4">
 
-  <div class="header-bar d-flex align-items-center justify-content-between flex-wrap">
-    <div>
-      <h1 class="header-title">Insulin Sensitivity Suite</h1>
-      <div class="header-sub">HOMA-IR • HOMA-β • QUICKI • Matsuda • ISI(0,120)</div>
-    </div>
-    <button id="scrollResults" class="jump-btn mt-2 mt-sm-0">View Results ↓</button>
+  <div class="header-bar mb-3">
+    <h1 class="header-title">Insulin Sensitivity Suite</h1>
+    <div class="header-sub">HOMA-IR • HOMA-BETA • QUICKI • Matsuda • ISI(0,120)</div>
   </div>
 
   <!-- Fasting section -->
-  <div class="card p-3 p-sm-4 mt-3 mb-3">
-    <div class="section-title">Fasting Values</div>
-    <div class="row g-3">
+  <div class="card p-3 p-sm-4 mb-3">
+    <div class="d-flex align-items-center justify-content-between flex-wrap">
+      <div class="section-title mb-2 mb-sm-0">Fasting Values</div>
+      <div class="d-flex align-items-center">
+        <button id="scrollResults" class="scroll-btn">Scroll to Results ↓</button>
+        <span id="readyText" class="ready-text">HOMA-IR, HOMA-BETA, and QUICKI ready</span>
+      </div>
+    </div>
+    <div class="row g-3 mt-1">
       <div class="col-12 col-sm-6">
         <label class="form-label">Fasting glucose</label>
         <div class="input-group">
@@ -87,16 +94,16 @@
       <label class="form-check-label" for="enableISI">Enable ISI(0,120) calculation</label>
     </div>
     <div class="row g-3">
-      <div class="col-6 col-md-3"><label class="form-label">Glucose 0′</label><input id="g0" type="number" class="form-control" inputmode="decimal"></div>
-      <div class="col-6 col-md-3"><label class="form-label">Insulin 0′</label><input id="i0" type="number" class="form-control" inputmode="decimal"></div>
-      <div class="col-6 col-md-3"><label class="form-label">Glucose 30′</label><input id="g30" type="number" class="form-control" inputmode="decimal"></div>
-      <div class="col-6 col-md-3"><label class="form-label">Insulin 30′</label><input id="i30" type="number" class="form-control" inputmode="decimal"></div>
-      <div class="col-6 col-md-3"><label class="form-label">Glucose 60′</label><input id="g60" type="number" class="form-control" inputmode="decimal"></div>
-      <div class="col-6 col-md-3"><label class="form-label">Insulin 60′</label><input id="i60" type="number" class="form-control" inputmode="decimal"></div>
-      <div class="col-6 col-md-3"><label class="form-label">Glucose 90′</label><input id="g90" type="number" class="form-control" inputmode="decimal"></div>
-      <div class="col-6 col-md-3"><label class="form-label">Insulin 90′</label><input id="i90" type="number" class="form-control" inputmode="decimal"></div>
-      <div class="col-6 col-md-3"><label class="form-label">Glucose 120′</label><input id="g120" type="number" class="form-control" inputmode="decimal"></div>
-      <div class="col-6 col-md-3"><label class="form-label">Insulin 120′</label><input id="i120" type="number" class="form-control" inputmode="decimal"></div>
+      <div class="col-6 col-md-3"><label class="form-label">Glucose 0′</label><input id="g0" type="number" class="form-control"></div>
+      <div class="col-6 col-md-3"><label class="form-label">Insulin 0′</label><input id="i0" type="number" class="form-control"></div>
+      <div class="col-6 col-md-3"><label class="form-label">Glucose 30′</label><input id="g30" type="number" class="form-control"></div>
+      <div class="col-6 col-md-3"><label class="form-label">Insulin 30′</label><input id="i30" type="number" class="form-control"></div>
+      <div class="col-6 col-md-3"><label class="form-label">Glucose 60′</label><input id="g60" type="number" class="form-control"></div>
+      <div class="col-6 col-md-3"><label class="form-label">Insulin 60′</label><input id="i60" type="number" class="form-control"></div>
+      <div class="col-6 col-md-3"><label class="form-label">Glucose 90′</label><input id="g90" type="number" class="form-control"></div>
+      <div class="col-6 col-md-3"><label class="form-label">Insulin 90′</label><input id="i90" type="number" class="form-control"></div>
+      <div class="col-6 col-md-3"><label class="form-label">Glucose 120′</label><input id="g120" type="number" class="form-control"></div>
+      <div class="col-6 col-md-3"><label class="form-label">Insulin 120′</label><input id="i120" type="number" class="form-control"></div>
     </div>
   </div>
 
@@ -106,24 +113,24 @@
     <ul id="resultList" class="result-list"></ul>
   </div>
 
-  <!-- Footer Reference -->
+  <!-- Footer -->
   <div class="card p-3 p-sm-4 mb-3">
     <div class="section-title">Reference Ranges & Explanation</div>
     <div class="table-responsive">
       <table class="table table-sm align-middle mb-2">
         <thead><tr><th>Index</th><th>Normal</th><th>Borderline/Impaired</th><th>Insulin-Resistant</th></tr></thead>
         <tbody>
-          <tr><td><strong>HOMA-IR</strong></td><td>&lt;2.0</td><td>2.0–2.5</td><td>&gt;2.5</td></tr>
-          <tr><td><strong>HOMA-β (%)</strong></td><td>60–140</td><td>—</td><td>&lt;60 or &gt;140</td></tr>
-          <tr><td><strong>QUICKI</strong></td><td>&gt;0.33</td><td>0.30–0.33</td><td>&lt;0.30</td></tr>
-          <tr><td><strong>Matsuda Index</strong></td><td>&gt;4.0</td><td>2.5–4.0</td><td>&lt;2.5</td></tr>
-          <tr><td><strong>ISI(0,120)</strong></td><td>&gt;4.3</td><td>2.9–4.3</td><td>&lt;2.9</td></tr>
+          <tr><td>HOMA-IR</td><td>&lt;2.0</td><td>2.0–2.5</td><td>&gt;2.5</td></tr>
+          <tr><td>HOMA-BETA (%)</td><td>60–140</td><td>—</td><td>&lt;60 or &gt;140</td></tr>
+          <tr><td>QUICKI</td><td>&gt;0.33</td><td>0.30–0.33</td><td>&lt;0.30</td></tr>
+          <tr><td>Matsuda Index</td><td>&gt;4.0</td><td>2.5–4.0</td><td>&lt;2.5</td></tr>
+          <tr><td>ISI(0,120)</td><td>&gt;4.3</td><td>2.9–4.3</td><td>&lt;2.9</td></tr>
         </tbody>
       </table>
     </div>
     <div class="footer-note">
       <b>HOMA-IR</b>: fasting estimate of hepatic insulin resistance.<br>
-      <b>HOMA-β</b>: fasting β-cell function (% of typical).<br>
+      <b>HOMA-BETA</b>: fasting β-cell function (% of typical).<br>
       <b>QUICKI</b>: fasting insulin sensitivity (higher = more sensitive).<br>
       <b>Matsuda Index</b>: OGTT-derived whole-body sensitivity.<br>
       <b>ISI(0,120)</b>: simplified OGTT insulin sensitivity (0′ & 120′ only).<br>
@@ -131,53 +138,39 @@
     </div>
   </div>
 
-  <p class="footer-note text-center mt-2">© 2025 — Insulin Sensitivity Suite. No data stored.</p>
+  <p class="footer-note text-center mt-2">© 2025 Insulin Sensitivity Suite · No data stored.</p>
 </div>
 
 <script>
 (function(){
   const fg=document.getElementById('fg'),fi=document.getElementById('fi');
+  const readyText=document.getElementById('readyText');
   const gEls=['g0','g30','g60','g90','g120'].map(id=>document.getElementById(id));
   const iEls=['i0','i30','i60','i90','i120'].map(id=>document.getElementById(id));
   const enableISI=document.getElementById('enableISI');
   const list=document.getElementById('resultList');
   const scrollBtn=document.getElementById('scrollResults');
-  const val=e=>parseFloat(e.value)||null, pos=v=>v&&v>0;
+  const val=e=>parseFloat(e.value)||null,pos=v=>v&&v>0;
 
   function makeRow(label,valtxt,state){
     const li=document.createElement('li');
     li.innerHTML=`<span class="label">${label}</span>
-      <span><span class="value">${valtxt}</span> 
+      <span><span class="value">${valtxt}</span>
       <span class="badge-int ${state.cls}">${state.txt}</span></span>`;
     list.appendChild(li);
   }
-  function stateHOMAIR(v){if(!pos(v))return{txt:'—',cls:''};
-    if(v<2)return{txt:'Normal',cls:'ok'};
-    if(v<=2.5)return{txt:'Borderline',cls:'border'};
-    return{txt:'Resistant',cls:'bad'};}
-  function stateHOMAB(v){if(!pos(v))return{txt:'—',cls:''};
-    if(v<60)return{txt:'Decreased',cls:'bad'};
-    if(v<=140)return{txt:'Normal',cls:'ok'};
-    return{txt:'High',cls:'border'};}
-  function stateQUICKI(v){if(!pos(v))return{txt:'—',cls:''};
-    if(v>0.33)return{txt:'Normal',cls:'ok'};
-    if(v>=0.30)return{txt:'Borderline',cls:'border'};
-    return{txt:'Resistant',cls:'bad'};}
-  function stateMatsuda(v){if(!pos(v))return{txt:'—',cls:''};
-    if(v>4)return{txt:'Normal',cls:'ok'};
-    if(v>=2.5)return{txt:'Impaired',cls:'border'};
-    return{txt:'Resistant',cls:'bad'};}
-  function stateISI(v){if(!pos(v))return{txt:'—',cls:''};
-    if(v>4.3)return{txt:'Normal',cls:'ok'};
-    if(v>=2.9)return{txt:'Impaired',cls:'border'};
-    return{txt:'Resistant',cls:'bad'};}
+  const stateHOMAIR=v=>!pos(v)?{txt:'—',cls:''}:v<2?{txt:'Normal',cls:'ok'}:v<=2.5?{txt:'Borderline',cls:'border'}:{txt:'Resistant',cls:'bad'};
+  const stateHOMAB=v=>!pos(v)?{txt:'—',cls:''}:v<60?{txt:'Decreased',cls:'bad'}:v<=140?{txt:'Normal',cls:'ok'}:{txt:'High',cls:'border'};
+  const stateQUICKI=v=>!pos(v)?{txt:'—',cls:''}:v>0.33?{txt:'Normal',cls:'ok'}:v>=0.30?{txt:'Borderline',cls:'border'}:{txt:'Resistant',cls:'bad'};
+  const stateMatsuda=v=>!pos(v)?{txt:'—',cls:''}:v>4?{txt:'Normal',cls:'ok'}:v>=2.5?{txt:'Impaired',cls:'border'}:{txt:'Resistant',cls:'bad'};
+  const stateISI=v=>!pos(v)?{txt:'—',cls:''}:v>4.3?{txt:'Normal',cls:'ok'}:v>=2.9?{txt:'Impaired',cls:'border'}:{txt:'Resistant',cls:'bad'};
 
   function compute(){
     list.innerHTML='';
     const g=val(fg),i=val(fi);
     if(pos(g)&&pos(i)){
       const hIR=(i*g)/405;makeRow('HOMA-IR:',hIR.toFixed(2),stateHOMAIR(hIR));
-      const gmmol=g/18;if(gmmol>3.5){const hB=(20*i)/(gmmol-3.5);makeRow('HOMA-β (%):',hB.toFixed(1),stateHOMAB(hB));}
+      const gmmol=g/18;if(gmmol>3.5){const hB=(20*i)/(gmmol-3.5);makeRow('HOMA-BETA (%):',hB.toFixed(1),stateHOMAB(hB));}
       const q=1/(Math.log10(i)+Math.log10(g));makeRow('QUICKI:',q.toFixed(3),stateQUICKI(q));
     }
     const G=gEls.map(val),I=iEls.map(val);
@@ -193,14 +186,23 @@
     }
     if(!list.innerHTML)list.innerHTML='<li><em>No sufficient data to compute indices yet.</em></li>';
   }
+
+  // Ready text control
+  function checkReady(){
+    const g=val(fg),i=val(fi);
+    if(pos(g)&&pos(i))readyText.classList.add('show');
+    else readyText.classList.remove('show');
+  }
+
   document.querySelectorAll('input').forEach(el=>{
-    el.addEventListener('input',compute);
-    el.addEventListener('focus',e=>{e.target.scrollIntoView({block:'center'});});
+    el.addEventListener('input',()=>{compute();checkReady();});
+    el.addEventListener('focus',()=>{}); // no auto scroll
   });
-  document.getElementById('copyFasting').onclick=()=>{document.getElementById('g0').value=fg.value;document.getElementById('i0').value=fi.value;compute();};
+
+  document.getElementById('copyFasting').onclick=()=>{document.getElementById('g0').value=fg.value;document.getElementById('i0').value=fi.value;compute();checkReady();};
   document.getElementById('clearOGTT').onclick=()=>{gEls.forEach(e=>e.value='');iEls.forEach(e=>e.value='');compute();};
   scrollBtn.onclick=()=>document.getElementById('results').scrollIntoView({behavior:'smooth'});
-  compute();
+  compute();checkReady();
 })();
 </script>
 </body>
