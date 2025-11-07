@@ -40,7 +40,6 @@ body{background:var(--bg);color:var(--text);
 .border{background:var(--badge-warn);color:var(--warn);}
 .bad{background:var(--badge-risk);color:var(--risk);}
 .footer-note{font-size:.85rem;color:var(--muted);}
-.table th{color:var(--accent);}
 .input-group-text{background:#eef2f7;border-color:var(--border);}
 .form-control:focus{border-color:#8fd4ce;box-shadow:0 0 0 .2rem rgba(22,130,122,.15);}
 </style>
@@ -50,7 +49,9 @@ body{background:var(--bg);color:var(--text);
 
   <div class="header-bar mb-3">
     <h1 class="header-title">Insulin Sensitivity Suite</h1>
-    <div class="header-sub">HOMA-IR • HOMA-BETA • QUICKI • Matsuda • ISI(0,120)</div>
+    <div class="header-sub">
+      HOMA-IR • HOMA-BETA • QUICKI • Matsuda • ISI(0,120) • IGI • DI
+    </div>
   </div>
 
   <!-- Fasting section -->
@@ -95,11 +96,12 @@ body{background:var(--bg);color:var(--text);
         <button id="clearOGTT" class="btn btn-sm btn-outline-secondary">Clear OGTT</button>
       </div>
     </div>
+
     <div class="form-check form-switch mb-3">
       <input class="form-check-input" type="checkbox" id="enableISI">
       <label class="form-check-label" for="enableISI">Enable ISI(0,120) calculation</label>
     </div>
-    <!-- Advanced research indices toggle -->
+
     <div class="form-check form-switch mb-3">
       <input class="form-check-input" type="checkbox" id="enableAdvanced">
       <label class="form-check-label" for="enableAdvanced">
@@ -125,11 +127,10 @@ body{background:var(--bg);color:var(--text);
   <div id="results" class="card p-3 p-sm-4 mb-3">
     <div class="section-title">Results & Interpretation</div>
     <ul id="resultList" class="result-list"></ul>
-    <!-- PDF button INSIDE results card -->
     <button id="pdfBtn" class="btn btn-outline-secondary mt-2">Download PDF Report</button>
   </div>
 
-  <!-- Reference formulas and basic information (immediately after results) -->
+  <!-- Reference formulas and basic information -->
   <div class="card p-3 p-sm-4 mb-3">
     <button class="btn btn-sm btn-outline-secondary mb-2"
             data-bs-toggle="collapse" data-bs-target="#refSection">
@@ -137,13 +138,13 @@ body{background:var(--bg);color:var(--text);
     </button>
     <div class="collapse" id="refSection">
       <ul class="mb-0 small">
-        <li><strong>HOMA-IR</strong> = (Glucose × Insulin) / 405 — Higher values → greater insulin resistance (Matthews DR et al., <em>Diabetologia</em> 1985).</li>
-        <li><strong>HOMA-BETA</strong> = (20 × Insulin) / (Glucose − 3.5) — Estimates β-cell function.</li>
-        <li><strong>QUICKI</strong> = 1 / [log(Insulin) + log(Glucose)] — Higher → greater insulin sensitivity (Katz A et al., <em>Metabolism</em> 2000).</li>
-        <li><strong>Matsuda Index</strong> = 10000 / √(FPG × FPI × Mean G × Mean I) — Whole-body insulin sensitivity from OGTT data.</li>
-        <li><strong>ISI (0,120)</strong> = 10000 / √(G₀ × I₀ × G₁₂₀ × I₁₂₀) — Simplified two-point index.</li>
-        <li><strong>IGI</strong> = (Insulin₃₀ − Insulin₀)/(Glucose₃₀ − Glucose₀) — Early insulin response to glucose.</li>
-        <li><strong>Disposition Index (DI)</strong> = IGI × Matsuda Index — β-cell function adjusted for insulin sensitivity.</li>
+        <li><strong>HOMA-IR</strong> = (Glucose × Insulin) / 405 — Higher → greater insulin resistance.</li>
+        <li><strong>HOMA-BETA</strong> = (20 × Insulin)/(Glucose − 3.5) — β-cell function estimate.</li>
+        <li><strong>QUICKI</strong> = 1 / [log(Insulin)+log(Glucose)] — Higher → better sensitivity.</li>
+        <li><strong>Matsuda Index</strong> = 10000 / √(FPG × FPI × Mean G × Mean I) — Whole-body sensitivity.</li>
+        <li><strong>ISI (0,120)</strong> = 10000 / √(G₀ × I₀ × G₁₂₀ × I₁₂₀) — Two-point estimate.</li>
+        <li><strong>IGI</strong> = (Insulin₃₀ − Insulin₀)/(Glucose₃₀ − Glucose₀) — Early insulin response.</li>
+        <li><strong>Disposition Index (DI)</strong> = IGI × Matsuda Index — β-cell function × sensitivity.</li>
       </ul>
     </div>
   </div>
@@ -163,9 +164,13 @@ body{background:var(--bg);color:var(--text);
     </div>
   </div>
 
-  <!-- Footer -->
-  <p class="footer-note text-center mt-2">© 2025 Shaurya Trivedi · Insulin Sensitivity Suite · No data stored.</p>
+  <p class="footer-note text-center mt-2">
+    © 2025 Shaurya Trivedi · Insulin Sensitivity Suite · No data stored.
+  </p>
 </div>
+<!-- Bootstrap JS for collapsibles -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
 <!-- jsPDF for real PDFs -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
@@ -182,27 +187,23 @@ body{background:var(--bg);color:var(--text);
   const enableAdvanced=document.getElementById('enableAdvanced');
   const list=document.getElementById('resultList');
   const scrollBtn=document.getElementById('scrollResults');
-  const val=e=>parseFloat(e.value)||null, pos=v=>v&&v>0;
+  const val=e=>parseFloat(e.value)||null,pos=v=>v&&v>0;
+  let mmol=false;
 
-  let mmol=false; // false = mg/dL & µU/mL; true = mmol/L & pmol/L
-
-  // Unit toggle with live conversion
   unitToggle.addEventListener('change',()=>{
     mmol=unitToggle.checked;
     if(mmol){
       if(fg.value) fg.value=(parseFloat(fg.value)/18).toFixed(2);
       if(fi.value) fi.value=(parseFloat(fi.value)*6).toFixed(2);
       glucoseUnit.textContent='mmol/L';insulinUnit.textContent='pmol/L';
-    } else {
+    }else{
       if(fg.value) fg.value=(parseFloat(fg.value)*18).toFixed(0);
       if(fi.value) fi.value=(parseFloat(fi.value)/6).toFixed(2);
       glucoseUnit.textContent='mg/dL';insulinUnit.textContent='µU/mL';
     }
-    compute();
-    checkReady();
+    compute();checkReady();
   });
 
-  // Row builder
   function makeRow(label,valtxt,state){
     const li=document.createElement('li');
     li.innerHTML=`<span class="label">${label}</span>
@@ -211,7 +212,6 @@ body{background:var(--bg);color:var(--text);
     list.appendChild(li);
   }
 
-  // Interpretation states
   const stateHOMAIR=v=>!pos(v)?{txt:'—',cls:''}:v<2?{txt:'Normal',cls:'ok'}:v<=2.5?{txt:'Borderline',cls:'border'}:{txt:'Resistant',cls:'bad'};
   const stateHOMAB=v=>!pos(v)?{txt:'—',cls:''}:v<60?{txt:'Decreased',cls:'bad'}:v<=140?{txt:'Normal',cls:'ok'}:{txt:'High',cls:'border'};
   const stateQUICKI=v=>!pos(v)?{txt:'—',cls:''}:v>0.33?{txt:'Normal',cls:'ok'}:v>=0.30?{txt:'Borderline',cls:'border'}:{txt:'Resistant',cls:'bad'};
@@ -220,136 +220,51 @@ body{background:var(--bg);color:var(--text);
 
   function compute(){
     list.innerHTML='';
-    let g=val(fg), i=val(fi);
+    let g=val(fg),i=val(fi);
+    if(mmol){g=g!=null?g*18:g;i=i!=null?i/6:i;}
 
-    // Convert fasting to canonical units if toggle is on
-    if(mmol){ g = g!=null ? g*18 : g; i = i!=null ? i/6 : i; }
-
-    // Fasting-based indices
     if(pos(g)&&pos(i)){
-      const hIR=(i*g)/405; makeRow('HOMA-IR:', hIR.toFixed(4), stateHOMAIR(hIR));
+      const hIR=(i*g)/405;makeRow('HOMA-IR:',hIR.toFixed(4),stateHOMAIR(hIR));
       const gmmol=g/18;
-      if(gmmol>3.5){
-        const hB=(20*i)/(gmmol-3.5); makeRow('HOMA-BETA (%):', hB.toFixed(4), stateHOMAB(hB));
-      }
-      const q=1/(Math.log10(i)+Math.log10(g)); makeRow('QUICKI:', q.toFixed(4), stateQUICKI(q));
+      if(gmmol>3.5){const hB=(20*i)/(gmmol-3.5);makeRow('HOMA-BETA (%):',hB.toFixed(4),stateHOMAB(hB));}
+      const q=1/(Math.log10(i)+Math.log10(g));makeRow('QUICKI:',q.toFixed(4),stateQUICKI(q));
     }
 
-    // OGTT-based indices
-    const G=gEls.map(val), I=iEls.map(val);
+    const G=gEls.map(val),I=iEls.map(val);
     if(G.every(pos)&&I.every(pos)&&pos(g)&&pos(i)){
-      const Gm=G.reduce((a,b)=>a+b,0)/G.length, Im=I.reduce((a,b)=>a+b,0)/I.length;
-      const m=10000/Math.sqrt((g*i)*(Gm*Im)); makeRow('Matsuda Index:', m.toFixed(4), stateMatsuda(m));
+      const Gm=G.reduce((a,b)=>a+b,0)/G.length,Im=I.reduce((a,b)=>a+b,0)/I.length;
+      const m=10000/Math.sqrt((g*i)*(Gm*Im));makeRow('Matsuda Index:',m.toFixed(4),stateMatsuda(m));
     }
 
     if(enableISI.checked){
       const g0=val(gEls[0]),i0=val(iEls[0]),g120=val(gEls[4]),i120=val(iEls[4]);
       if([g0,i0,g120,i120].every(pos)){
-        const isi=10000/Math.sqrt((g0*i0)*(g120*i120)); makeRow('ISI(0,120):', isi.toFixed(4), stateISI(isi));
+        const isi=10000/Math.sqrt((g0*i0)*(g120*i120));makeRow('ISI (0,120):',isi.toFixed(4),stateISI(isi));
       }
     }
 
-    // Advanced research indices (IGI & DI)
     if(enableAdvanced.checked){
-      const g0=val(gEls[0]), i0=val(iEls[0]), g30=val(document.getElementById('g30')), i30=val(document.getElementById('i30'));
+      const g0=val(gEls[0]),i0=val(iEls[0]),g30=val(document.getElementById('g30')),i30=val(document.getElementById('i30'));
       if(pos(g0)&&pos(i0)&&pos(g30)&&pos(i30)&&g30!==g0){
-        const IGI=(i30 - i0)/(g30 - g0);
-        makeRow('Insulinogenic Index (IGI):', IGI.toFixed(4), {txt:'—',cls:''});
-        // Use Matsuda (if already computed in list)
+        const IGI=(i30-i0)/(g30-g0);makeRow('Insulinogenic Index (IGI):',IGI.toFixed(4),{txt:'—',cls:''});
         let mVal=null;
-        Array.from(list.children).forEach(li=>{
-          if(li.textContent.includes('Matsuda Index')){
-            const num=li.querySelector('.value')?.textContent;
-            if(num) mVal=parseFloat(num);
-          }
-        });
-        if(mVal!=null && !isNaN(mVal)){
-          const DI=IGI*mVal;
-          makeRow('Disposition Index (DI):', DI.toFixed(4), {txt:'—',cls:''});
-        }
+        Array.from(list.children).forEach(li=>{if(li.textContent.includes('Matsuda Index')){const num=li.querySelector('.value')?.textContent;if(num)mVal=parseFloat(num);}});
+        if(mVal!=null&&!isNaN(mVal)){const DI=IGI*mVal;makeRow('Disposition Index (DI):',DI.toFixed(4),{txt:'—',cls:''});}
       }
     }
-
-    if(!list.innerHTML) list.innerHTML='<li><em>No sufficient data to compute indices yet.</em></li>';
+    if(!list.innerHTML)list.innerHTML='<li><em>No sufficient data to compute indices yet.</em></li>';
   }
 
-  function checkReady(){
-    const g=val(fg), i=val(fi);
-    if(pos(g)&&pos(i)) readyText.classList.add('show'); else readyText.classList.remove('show');
-  }
-
-  document.querySelectorAll('input').forEach(el=>{
-    el.addEventListener('input', ()=>{ compute(); checkReady(); });
-  });
-
-  document.getElementById('copyFasting').onclick=()=>{
-    document.getElementById('g0').value=fg.value;
-    document.getElementById('i0').value=fi.value;
-    compute(); checkReady();
-  };
-  document.getElementById('clearOGTT').onclick=()=>{
-    gEls.forEach(e=>e.value=''); iEls.forEach(e=>e.value=''); compute();
-  };
+  function checkReady(){const g=val(fg),i=val(fi);if(pos(g)&&pos(i))readyText.classList.add('show');else readyText.classList.remove('show');}
+  document.querySelectorAll('input').forEach(el=>{el.addEventListener('input',()=>{compute();checkReady();});});
+  document.getElementById('copyFasting').onclick=()=>{document.getElementById('g0').value=fg.value;document.getElementById('i0').value=fi.value;compute();checkReady();};
+  document.getElementById('clearOGTT').onclick=()=>{gEls.forEach(e=>e.value='');iEls.forEach(e=>e.value='');compute();};
   scrollBtn.onclick=()=>document.getElementById('results').scrollIntoView({behavior:'smooth'});
 
-  // --- PDF generator (with Indian timestamp) ---
-  function indianTimestamp(){
-    const d = new Date();
-    const dd = String(d.getDate()).padStart(2,'0');
-    const mm = String(d.getMonth()+1).padStart(2,'0');
-    const yyyy = d.getFullYear();
-    const hh = String(d.getHours()).padStart(2,'0');
-    const min = String(d.getMinutes()).padStart(2,'0');
-    return `${dd}/${mm}/${yyyy} ${hh}:${min}`;
-  }
+  function indianTimestamp(){const d=new Date();return `${d.getDate().toString().padStart(2,'0')}/${(d.getMonth()+1).toString().padStart(2,'0')}/${d.getFullYear()} ${d.getHours().toString().padStart(2,'0')}:${d.getMinutes().toString().padStart(2,'0')}`;}
 
-  document.getElementById('pdfBtn').addEventListener('click', () => {
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF({unit:"pt",format:"a4"});
-    let y = 40;
-
-    doc.setFontSize(14);
-    doc.text("Insulin Sensitivity Suite Report", 40, y);
-    y += 20;
-    doc.setFontSize(11);
-    doc.text(`Generated on: ${indianTimestamp()}`, 40, y);
-    y += 20;
-
-    doc.setFontSize(12);
-    doc.text("Input Values:", 40, y); y += 14;
-
-    // Fasting inputs with units
-    const gu = document.getElementById('glucoseUnit').textContent.trim();
-    const iu = document.getElementById('insulinUnit').textContent.trim();
-    if(fg.value) { doc.text(`Fasting glucose: ${fg.value} ${gu}`, 60, y); y+=12; }
-    if(fi.value) { doc.text(`Fasting insulin: ${fi.value} ${iu}`, 60, y); y+=12; }
-
-    // OGTT inputs
-    const ogttFields = ['g0','i0','g30','i30','g60','i60','g90','i90','g120','i120'];
-    ogttFields.forEach(id=>{
-      const el = document.getElementById(id);
-      if(el && el.value){
-        const label = el.previousElementSibling ? el.previousElementSibling.innerText : id;
-        doc.text(`${label}: ${el.value}`, 60, y);
-        y+=12;
-        if(y>780){ doc.addPage(); y=40; }
-      }
-    });
-
-    y += 10;
-    doc.text("Calculated Results:", 40, y); y += 14;
-
-    Array.from(document.querySelectorAll('#resultList li')).forEach(li=>{
-      doc.text(li.innerText, 60, y);
-      y+=14;
-      if(y>780){ doc.addPage(); y=40; }
-    });
-
-    doc.save("Insulin_Sensitivity_Suite_Report.pdf");
-  });
-
-  // Init
-  compute(); checkReady();
+  document.getElementById('pdfBtn').addEventListener('click',()=>{const{jsPDF}=window.jspdf;const doc=new jsPDF({unit:"pt",format:"a4"});let y=40;doc.setFontSize(14);doc.text("Insulin Sensitivity Suite Report",40,y);y+=20;doc.setFontSize(11);doc.text(`Generated on: ${indianTimestamp()}`,40,y);y+=20;doc.setFontSize(12);doc.text("Input Values:",40,y);y+=14;const gu=document.getElementById('glucoseUnit').textContent.trim();const iu=document.getElementById('insulinUnit').textContent.trim();if(fg.value){doc.text(`Fasting glucose: ${fg.value} ${gu}`,60,y);y+=12;}if(fi.value){doc.text(`Fasting insulin: ${fi.value} ${iu}`,60,y);y+=12;}const ogttFields=['g0','i0','g30','i30','g60','i60','g90','i90','g120','i120'];ogttFields.forEach(id=>{const el=document.getElementById(id);if(el&&el.value){const label=el.previousElementSibling?el.previousElementSibling.innerText:id;doc.text(`${label}: ${el.value}`,60,y);y+=12;if(y>780){doc.addPage();y=40;}}});y+=10;doc.text("Calculated Results:",40,y);y+=14;Array.from(document.querySelectorAll('#resultList li')).forEach(li=>{doc.text(li.innerText,60,y);y+=14;if(y>780){doc.addPage();y=40;}});doc.save("Insulin_Sensitivity_Suite_Report.pdf");});
+  compute();checkReady();
 })();
 </script>
 </body>
