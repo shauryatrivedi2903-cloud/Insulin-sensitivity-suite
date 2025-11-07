@@ -42,6 +42,18 @@ body{background:var(--bg);color:var(--text);
 .footer-note{font-size:.85rem;color:var(--muted);}
 .input-group-text{background:#eef2f7;border-color:var(--border);}
 .form-control:focus{border-color:#8fd4ce;box-shadow:0 0 0 .2rem rgba(22,130,122,.15);}
+
+/* Required-field dots */
+.dot-red::after,
+.dot-blue::after{content:"●";font-size:.8rem;margin-left:.25rem;vertical-align:middle;}
+.dot-red::after{color:#dc3545;}  /* red for ISI */
+.dot-blue::after{color:#0d6efd;} /* blue for IGI/DI */
+/* dual-dot on shared fields when both toggles active */
+.dot-red.dot-blue::after{content:"●●";letter-spacing:1px;color:#dc3545;text-shadow:-6px 0 #0d6efd;}
+
+/* Colored toggle switches (match dots) */
+#enableISI.form-check-input:checked{background-color:#dc3545;border-color:#dc3545;}
+#enableAdvanced.form-check-input:checked{background-color:#0d6efd;border-color:#0d6efd;}
 </style>
 </head>
 <body>
@@ -65,14 +77,14 @@ body{background:var(--bg);color:var(--text);
 
     <div class="row g-3 mt-1">
       <div class="col-12 col-sm-6">
-        <label class="form-label">Fasting glucose</label>
+        <label for="fg" class="form-label">Fasting glucose</label>
         <div class="input-group">
           <input id="fg" type="number" class="form-control" inputmode="decimal" placeholder="e.g., 92">
           <span id="glucoseUnit" class="input-group-text">mg/dL</span>
         </div>
       </div>
       <div class="col-12 col-sm-6">
-        <label class="form-label">Fasting insulin</label>
+        <label for="fi" class="form-label">Fasting insulin</label>
         <div class="input-group">
           <input id="fi" type="number" class="form-control" inputmode="decimal" placeholder="e.g., 10">
           <span id="insulinUnit" class="input-group-text">µU/mL</span>
@@ -110,16 +122,16 @@ body{background:var(--bg);color:var(--text);
     </div>
 
     <div class="row g-3">
-      <div class="col-6 col-md-3"><label class="form-label">Glucose 0′</label><input id="g0" type="number" class="form-control"></div>
-      <div class="col-6 col-md-3"><label class="form-label">Insulin 0′</label><input id="i0" type="number" class="form-control"></div>
-      <div class="col-6 col-md-3"><label class="form-label">Glucose 30′</label><input id="g30" type="number" class="form-control"></div>
-      <div class="col-6 col-md-3"><label class="form-label">Insulin 30′</label><input id="i30" type="number" class="form-control"></div>
-      <div class="col-6 col-md-3"><label class="form-label">Glucose 60′</label><input id="g60" type="number" class="form-control"></div>
-      <div class="col-6 col-md-3"><label class="form-label">Insulin 60′</label><input id="i60" type="number" class="form-control"></div>
-      <div class="col-6 col-md-3"><label class="form-label">Glucose 90′</label><input id="g90" type="number" class="form-control"></div>
-      <div class="col-6 col-md-3"><label class="form-label">Insulin 90′</label><input id="i90" type="number" class="form-control"></div>
-      <div class="col-6 col-md-3"><label class="form-label">Glucose 120′</label><input id="g120" type="number" class="form-control"></div>
-      <div class="col-6 col-md-3"><label class="form-label">Insulin 120′</label><input id="i120" type="number" class="form-control"></div>
+      <div class="col-6 col-md-3"><label for="g0" class="form-label">Glucose 0′</label><input id="g0" type="number" class="form-control"></div>
+      <div class="col-6 col-md-3"><label for="i0" class="form-label">Insulin 0′</label><input id="i0" type="number" class="form-control"></div>
+      <div class="col-6 col-md-3"><label for="g30" class="form-label">Glucose 30′</label><input id="g30" type="number" class="form-control"></div>
+      <div class="col-6 col-md-3"><label for="i30" class="form-label">Insulin 30′</label><input id="i30" type="number" class="form-control"></div>
+      <div class="col-6 col-md-3"><label for="g60" class="form-label">Glucose 60′</label><input id="g60" type="number" class="form-control"></div>
+      <div class="col-6 col-md-3"><label for="i60" class="form-label">Insulin 60′</label><input id="i60" type="number" class="form-control"></div>
+      <div class="col-6 col-md-3"><label for="g90" class="form-label">Glucose 90′</label><input id="g90" type="number" class="form-control"></div>
+      <div class="col-6 col-md-3"><label for="i90" class="form-label">Insulin 90′</label><input id="i90" type="number" class="form-control"></div>
+      <div class="col-6 col-md-3"><label for="g120" class="form-label">Glucose 120′</label><input id="g120" type="number" class="form-control"></div>
+      <div class="col-6 col-md-3"><label for="i120" class="form-label">Insulin 120′</label><input id="i120" type="number" class="form-control"></div>
     </div>
   </div>
     <!-- Results -->
@@ -189,7 +201,7 @@ body{background:var(--bg);color:var(--text);
 
   let mmol=false; // false = mg/dL & µU/mL; true = mmol/L & pmol/L
 
-  // Unit toggle with live conversion
+  // Unit toggle with live conversion (fasting only; OGTT inputs remain as entered)
   unitToggle.addEventListener('change',()=>{
     mmol=unitToggle.checked;
     if(mmol){
@@ -223,8 +235,11 @@ body{background:var(--bg);color:var(--text);
   function compute(){
     list.innerHTML='';
     let g=val(fg), i=val(fi);
+
+    // Convert fasting to canonical units internally
     if(mmol){ g = g!=null ? g*18 : g; i = i!=null ? i/6 : i; }
 
+    // Fasting-based
     if(pos(g)&&pos(i)){
       const hIR=(i*g)/405; makeRow('HOMA-IR:', hIR.toFixed(4), stateHOMAIR(hIR));
       const gmmol=g/18;
@@ -232,12 +247,14 @@ body{background:var(--bg);color:var(--text);
       const q=1/(Math.log10(i)+Math.log10(g)); makeRow('QUICKI:', q.toFixed(4), stateQUICKI(q));
     }
 
+    // OGTT-based
     const G=gEls.map(val), I=iEls.map(val);
     if(G.every(pos)&&I.every(pos)&&pos(g)&&pos(i)){
       const Gm=G.reduce((a,b)=>a+b,0)/G.length, Im=I.reduce((a,b)=>a+b,0)/I.length;
       const m=10000/Math.sqrt((g*i)*(Gm*Im)); makeRow('Matsuda Index:', m.toFixed(4), stateMatsuda(m));
     }
 
+    // ISI(0,120)
     if(enableISI.checked){
       const g0=val(gEls[0]),i0=val(iEls[0]),g120=val(gEls[4]),i120=val(iEls[4]);
       if([g0,i0,g120,i120].every(pos)){
@@ -245,10 +262,12 @@ body{background:var(--bg);color:var(--text);
       }
     }
 
+    // IGI & DI
     if(enableAdvanced.checked){
       const g0=val(gEls[0]), i0=val(iEls[0]), g30=val(document.getElementById('g30')), i30=val(document.getElementById('i30'));
       if(pos(g0)&&pos(i0)&&pos(g30)&&pos(i30)&&g30!==g0){
         const IGI=(i30 - i0)/(g30 - g0); makeRow('Insulinogenic Index (IGI):', IGI.toFixed(4), {txt:'—',cls:''});
+        // use Matsuda if available
         let mVal=null;
         Array.from(list.children).forEach(li=>{
           if(li.textContent.includes('Matsuda Index')){
@@ -270,17 +289,42 @@ body{background:var(--bg);color:var(--text);
     if(pos(g)&&pos(i)) readyText.classList.add('show'); else readyText.classList.remove('show');
   }
 
+  // Highlight required OGTT fields with red/blue dots depending on toggles
+  function highlightRequired() {
+    // clear old dots
+    document.querySelectorAll('.form-label').forEach(label=>{
+      label.classList.remove('dot-red','dot-blue');
+    });
+    // ISI -> red on 0' and 120'
+    if(enableISI.checked){
+      ['g0','i0','g120','i120'].forEach(id=>{
+        const label=document.querySelector(`label[for=${id}]`);
+        if(label) label.classList.add('dot-red');
+      });
+    }
+    // IGI/DI -> blue on 0' and 30'
+    if(enableAdvanced.checked){
+      ['g0','i0','g30','i30'].forEach(id=>{
+        const label=document.querySelector(`label[for=${id}]`);
+        if(label) label.classList.add('dot-blue');
+      });
+    }
+  }
+
+  // Listeners
   document.querySelectorAll('input').forEach(el=>{
     el.addEventListener('input', ()=>{ compute(); checkReady(); });
   });
+  enableISI.addEventListener('change', ()=>{ highlightRequired(); compute(); });
+  enableAdvanced.addEventListener('change', ()=>{ highlightRequired(); compute(); });
 
   document.getElementById('copyFasting').onclick=()=>{
     document.getElementById('g0').value=fg.value;
     document.getElementById('i0').value=fi.value;
-    compute(); checkReady();
+    compute(); checkReady(); highlightRequired();
   };
   document.getElementById('clearOGTT').onclick=()=>{
-    gEls.forEach(e=>e.value=''); iEls.forEach(e=>e.value=''); compute();
+    gEls.forEach(e=>e.value=''); iEls.forEach(e=>e.value=''); compute(); highlightRequired();
   };
   scrollBtn.onclick=()=>document.getElementById('results').scrollIntoView({behavior:'smooth'});
 
@@ -295,7 +339,7 @@ body{background:var(--bg);color:var(--text);
     return `${dd}/${mm}/${yyyy} ${hh}:${min}`;
   }
 
-  // --- FINAL PDF GENERATOR with filename prompt, spacing, wrapping, metadata ---
+  // --- PDF generator with filename prompt + clean labels + spacing/wrapping ---
   document.getElementById('pdfBtn').addEventListener('click', () => {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF({ unit: "pt", format: "a4" });
@@ -326,50 +370,55 @@ body{background:var(--bg);color:var(--text);
     if (fg.value) { doc.text(`Fasting Glucose: ${fg.value} ${gu}`, 60, y); y += lineGap; }
     if (fi.value) { doc.text(`Fasting Insulin: ${fi.value} ${iu}`, 60, y); y += sectionGap; }
 
-    // OGTT
+    // OGTT Values (use robust (x min) labels to avoid unicode issues)
     doc.setFontSize(13); doc.text("OGTT Values", 40, y); y += lineGap;
     doc.setFontSize(11);
-    const ogttFields = [
-      ["Glucose 0′","g0"],["Insulin 0′","i0"],["Glucose 30′","g30"],["Insulin 30′","i30"],
-      ["Glucose 60′","g60"],["Insulin 60′","i60"],["Glucose 90′","g90"],["Insulin 90′","i90"],
-      ["Glucose 120′","g120"],["Insulin 120′","i120"]
+    const ogttPairs = [
+      ["Glucose (0 min)", "g0"],   ["Insulin (0 min)", "i0"],
+      ["Glucose (30 min)", "g30"], ["Insulin (30 min)", "i30"],
+      ["Glucose (60 min)", "g60"], ["Insulin (60 min)", "i60"],
+      ["Glucose (90 min)", "g90"], ["Insulin (90 min)", "i90"],
+      ["Glucose (120 min)", "g120"],["Insulin (120 min)", "i120"]
     ];
-    ogttFields.forEach(([label,id])=>{
+    ogttPairs.forEach(([label,id])=>{
       const el=document.getElementById(id);
-      if(el&&el.value){ doc.text(`${label}: ${el.value}`,60,y); y+=lineGap; if(y>750){doc.addPage(); y=60;} }
+      if(el && el.value){
+        doc.text(`${label}: ${el.value}`, 60, y);
+        y += lineGap;
+        if (y > 750) { doc.addPage(); y = 60; }
+      }
     });
-    y+=sectionGap;
+    y += sectionGap;
 
-    // Results
+    // Calculated Results
     doc.setFontSize(13); doc.text("Calculated Results", 40, y); y += lineGap;
     doc.setFontSize(11);
     const results = Array.from(document.querySelectorAll('#resultList li')).map(li=>li.innerText);
     results.forEach(r=>{
       const wrapped = doc.splitTextToSize(r, 480);
       wrapped.forEach(line=>{
-        doc.text(line, 60, y); y+=lineGap;
-        if(y>780){ doc.addPage(); y=60; }
+        doc.text(line, 60, y); y += lineGap;
+        if (y > 780) { doc.addPage(); y = 60; }
       });
     });
-    y+=sectionGap;
+    y += sectionGap;
 
     // Footer note + author
     doc.setFontSize(10); doc.setTextColor(100);
     doc.text("Note: For educational and research use only. Not for diagnostic application.", 40, y, {maxWidth: 520});
-    y+=20; doc.setTextColor(80);
+    y += 20; doc.setTextColor(80);
     doc.text("Generated by: Shaurya Trivedi — Insulin Sensitivity Suite", 40, y);
 
-    // Ask for filename (with default suggestion)
+    // Filename prompt (with default suggestion)
     let fname = prompt("Enter filename for the report:", "Insulin_Sensitivity_Suite_Report");
     if(!fname || !fname.trim()) fname = "Insulin_Sensitivity_Suite_Report";
-    fname = fname.trim().replace(/[\\/:*?"<>|]+/g,''); // sanitize
+    fname = fname.trim().replace(/[\\/:*?\"<>|]+/g,''); // sanitize illegal filename chars
     if(!fname.toLowerCase().endsWith(".pdf")) fname += ".pdf";
-
     doc.save(fname);
   });
 
   // Init
-  compute(); checkReady();
+  compute(); checkReady(); highlightRequired();
 })();
 </script>
 </body>
