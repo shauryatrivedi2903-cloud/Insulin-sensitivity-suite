@@ -7,60 +7,128 @@
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 <style>
 :root{
-  --bg:#f3f4f6;--card:#ffffff;--border:#e3e6eb;
-  --text:#1f2937;--muted:#6b7280;--accent:#16827a; /* teal */
-  --ok:#198754;--warn:#d39e00;--risk:#dc3545;
-  --badge-ok:#d1e7dd;--badge-warn:#fff3cd;--badge-risk:#f8d7da;
+  --bg:#f3f4f6;
+  --card:#ffffff;
+  --border:#e3e6eb;
+  --text:#1f2937;
+  --muted:#6b7280;
+  --accent:#16827a; /* teal accent */
+  --ok:#198754;
+  --warn:#d39e00;
+  --risk:#dc3545;
+  --badge-ok:#d1e7dd;
+  --badge-warn:#fff3cd;
+  --badge-risk:#f8d7da;
 }
-body{background:var(--bg);color:var(--text);
-  font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;}
-.container-narrow{max-width:960px}
-.header-bar{background:linear-gradient(180deg,#fafafa 0%,#f1f3f6 100%);
-  border:1px solid var(--border);border-radius:14px;padding:16px 18px;
-  box-shadow:0 2px 6px rgba(0,0,0,.03);}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+}
+.container-narrow{max-width:960px;}
+.header-bar{
+  background:linear-gradient(180deg,#fafafa 0%,#f1f3f6 100%);
+  border:1px solid var(--border);
+  border-radius:14px;
+  padding:16px 18px;
+  box-shadow:0 2px 6px rgba(0,0,0,.03);
+}
 .header-title{font-size:1.3rem;font-weight:700;margin:0;color:var(--accent);}
 .header-sub{font-size:.92rem;color:var(--muted);}
-.scroll-btn{background:var(--accent);color:#fff;border:none;font-weight:600;
-  border-radius:999px;padding:.4rem .9rem;box-shadow:0 4px 12px rgba(22,130,122,.2);
-  font-size:.9rem;}
-.ready-text{margin-left:.6rem;font-size:.9rem;font-style:italic;
-  color:#4b635c;opacity:0;transition:opacity .2s ease;}
+.scroll-btn{
+  background:var(--accent);
+  color:#fff;
+  border:none;
+  font-weight:600;
+  border-radius:999px;
+  padding:.4rem .9rem;
+  box-shadow:0 4px 12px rgba(22,130,122,.2);
+  font-size:.9rem;
+}
+.ready-text{
+  margin-left:.6rem;
+  font-size:.9rem;
+  font-style:italic;
+  color:#4b635c;
+  opacity:0;
+  transition:opacity .2s ease;
+}
 .ready-text.show{opacity:1;}
-.card{background:var(--card);border:1px solid var(--border);
-  border-radius:14px;box-shadow:0 1px 4px rgba(0,0,0,.03);}
+.card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:14px;
+  box-shadow:0 1px 4px rgba(0,0,0,.03);
+}
 .section-title{font-weight:700;color:var(--accent);margin-bottom:.5rem;}
 .result-list{list-style:none;padding:0;margin:0;}
-.result-list li{display:flex;justify-content:space-between;align-items:center;
-  border:1px solid var(--border);border-radius:12px;padding:.6rem .8rem;margin:.4rem 0;}
+.result-list li{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:.6rem .8rem;
+  margin:.4rem 0;
+}
 .label{font-weight:600;color:var(--accent);}
 .value{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;}
-.badge-int{font-size:.8rem;font-weight:600;border-radius:10px;
-  padding:.2rem .6rem;color:#212529;}
+.badge-int{
+  font-size:.8rem;
+  font-weight:600;
+  border-radius:10px;
+  padding:.2rem .6rem;
+  color:#212529;
+}
 .ok{background:var(--badge-ok);color:var(--ok);}
 .border{background:var(--badge-warn);color:var(--warn);}
 .bad{background:var(--badge-risk);color:var(--risk);}
 .footer-note{font-size:.85rem;color:var(--muted);}
 .input-group-text{background:#eef2f7;border-color:var(--border);}
-.form-control:focus{border-color:#8fd4ce;box-shadow:0 0 0 .2rem rgba(22,130,122,.15);}
-
-/* --- DOT INDICATORS (final, no duplicates) --- */
-/* reset default pseudo-elements so we control exactly one */
-.form-label.dot-red::after,.form-label.dot-blue::after{content:none;}
-/* ISI only (red) -> single dot via ::before */
-.form-label.dot-red:not(.dot-blue)::before{
-  content:"●";color:#dc3545;font-size:.85rem;margin-left:.25rem;vertical-align:middle;
-}
-/* IGI/DI only (blue) -> single dot via ::before */
-.form-label.dot-blue:not(.dot-red)::before{
-  content:"●";color:#0d6efd;font-size:.85rem;margin-left:.25rem;vertical-align:middle;
-}
-/* both toggles -> exactly two dots once */
-.form-label.dot-red.dot-blue::before{
-  content:"●●";letter-spacing:2px;color:#dc3545;text-shadow:6px 0 #0d6efd;
-  font-size:.85rem;margin-left:.25rem;vertical-align:middle;position:relative;z-index:2;
+.form-control:focus{
+  border-color:#8fd4ce;
+  box-shadow:0 0 0 .2rem rgba(22,130,122,.15);
 }
 
-/* toggle colours */
+/* ---------- Elegant dual-dot indicator system ---------- */
+.form-label::before,
+.form-label::after { content:none; }
+
+/* ISI only → red dot close to label */
+.form-label.dot-red:not(.dot-blue)::after {
+  content:"●";
+  color:#dc3545;
+  font-size:.85rem;
+  margin-left:0.35rem;
+  vertical-align:middle;
+  position:relative;
+  top:-1px;
+}
+
+/* IGI/DI only → blue dot slightly farther out */
+.form-label.dot-blue:not(.dot-red)::after {
+  content:"●";
+  color:#0d6efd;
+  font-size:.85rem;
+  margin-left:0.55rem;
+  vertical-align:middle;
+  position:relative;
+  top:-1px;
+}
+
+/* Both toggles active → red then blue, spaced nicely */
+.form-label.dot-red.dot-blue::after {
+  content:"●  ●";
+  color:#dc3545;
+  text-shadow:9px 0 #0d6efd;
+  font-size:.85rem;
+  margin-left:0.35rem;
+  vertical-align:middle;
+  position:relative;
+  top:-1px;
+}
+
+/* Toggle colors */
 #enableISI.form-check-input:checked{background-color:#dc3545;border-color:#dc3545;}   /* red */
 #enableAdvanced.form-check-input:checked{background-color:#0d6efd;border-color:#0d6efd;} /* blue */
 #unitToggle.form-check-input:checked{background-color:var(--accent);border-color:var(--accent);} /* teal */
@@ -83,6 +151,7 @@ body{background:var(--bg);color:var(--text);
         <span id="readyText" class="ready-text">HOMA-IR, HOMA-BETA, and QUICKI ready</span>
       </div>
     </div>
+
     <div class="row g-3 mt-1">
       <div class="col-12 col-sm-6">
         <label for="fg" class="form-label">Fasting glucose</label>
@@ -99,6 +168,8 @@ body{background:var(--bg);color:var(--text);
         </div>
       </div>
     </div>
+
+    <!-- Unit toggle (teal when ON) -->
     <div class="form-check form-switch mt-3">
       <input class="form-check-input" type="checkbox" id="unitToggle">
       <label class="form-check-label" for="unitToggle">Use mmol/L and pmol/L units</label>
@@ -109,11 +180,13 @@ body{background:var(--bg);color:var(--text);
   <div class="card p-3 p-sm-4 mb-3">
     <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap">
       <div class="section-title mb-0">OGTT Values (for Matsuda Index)</div>
-      <div>
+      <div class="d-flex gap-2">
         <button id="copyFasting" class="btn btn-sm btn-outline-secondary">Copy fasting → 0′</button>
         <button id="clearOGTT" class="btn btn-sm btn-outline-secondary">Clear OGTT</button>
       </div>
     </div>
+
+    <!-- ISI & IGI/DI toggles -->
     <div class="form-check form-switch mb-3">
       <input class="form-check-input" type="checkbox" id="enableISI">
       <label class="form-check-label" for="enableISI">Enable ISI(0,120) calculation</label>
@@ -123,17 +196,52 @@ body{background:var(--bg);color:var(--text);
       <label class="form-check-label" for="enableAdvanced">Show advanced research indices (IGI & DI)</label>
     </div>
 
+    <!-- OGTT inputs -->
     <div class="row g-3">
-      <div class="col-6 col-md-3"><label for="g0" class="form-label">Glucose 0′</label><input id="g0" type="number" class="form-control"></div>
-      <div class="col-6 col-md-3"><label for="i0" class="form-label">Insulin 0′</label><input id="i0" type="number" class="form-control"></div>
-      <div class="col-6 col-md-3"><label for="g30" class="form-label">Glucose 30′</label><input id="g30" type="number" class="form-control"></div>
-      <div class="col-6 col-md-3"><label for="i30" class="form-label">Insulin 30′</label><input id="i30" type="number" class="form-control"></div>
-      <div class="col-6 col-md-3"><label for="g60" class="form-label">Glucose 60′</label><input id="g60" type="number" class="form-control"></div>
-      <div class="col-6 col-md-3"><label for="i60" class="form-label">Insulin 60′</label><input id="i60" type="number" class="form-control"></div>
-      <div class="col-6 col-md-3"><label for="g90" class="form-label">Glucose 90′</label><input id="g90" type="number" class="form-control"></div>
-      <div class="col-6 col-md-3"><label for="i90" class="form-label">Insulin 90′</label><input id="i90" type="number" class="form-control"></div>
-      <div class="col-6 col-md-3"><label for="g120" class="form-label">Glucose 120′</label><input id="g120" type="number" class="form-control"></div>
-      <div class="col-6 col-md-3"><label for="i120" class="form-label">Insulin 120′</label><input id="i120" type="number" class="form-control"></div>
+      <div class="col-6 col-md-3">
+        <label for="g0" class="form-label">Glucose 0′</label>
+        <input id="g0" type="number" class="form-control" inputmode="decimal">
+      </div>
+      <div class="col-6 col-md-3">
+        <label for="i0" class="form-label">Insulin 0′</label>
+        <input id="i0" type="number" class="form-control" inputmode="decimal">
+      </div>
+
+      <div class="col-6 col-md-3">
+        <label for="g30" class="form-label">Glucose 30′</label>
+        <input id="g30" type="number" class="form-control" inputmode="decimal">
+      </div>
+      <div class="col-6 col-md-3">
+        <label for="i30" class="form-label">Insulin 30′</label>
+        <input id="i30" type="number" class="form-control" inputmode="decimal">
+      </div>
+
+      <div class="col-6 col-md-3">
+        <label for="g60" class="form-label">Glucose 60′</label>
+        <input id="g60" type="number" class="form-control" inputmode="decimal">
+      </div>
+      <div class="col-6 col-md-3">
+        <label for="i60" class="form-label">Insulin 60′</label>
+        <input id="i60" type="number" class="form-control" inputmode="decimal">
+      </div>
+
+      <div class="col-6 col-md-3">
+        <label for="g90" class="form-label">Glucose 90′</label>
+        <input id="g90" type="number" class="form-control" inputmode="decimal">
+      </div>
+      <div class="col-6 col-md-3">
+        <label for="i90" class="form-label">Insulin 90′</label>
+        <input id="i90" type="number" class="form-control" inputmode="decimal">
+      </div>
+
+      <div class="col-6 col-md-3">
+        <label for="g120" class="form-label">Glucose 120′</label>
+        <input id="g120" type="number" class="form-control" inputmode="decimal">
+      </div>
+      <div class="col-6 col-md-3">
+        <label for="i120" class="form-label">Insulin 120′</label>
+        <input id="i120" type="number" class="form-control" inputmode="decimal">
+      </div>
     </div>
   </div>
     <!-- Results -->
@@ -143,7 +251,7 @@ body{background:var(--bg);color:var(--text);
     <button id="pdfBtn" class="btn btn-outline-secondary mt-2">Download PDF Report</button>
   </div>
 
-  <!-- Reference formulas and basic information (with ranges + sources) -->
+  <!-- Reference formulas and basic information -->
   <div class="card p-3 p-sm-4 mb-3">
     <button class="btn btn-sm btn-outline-secondary mb-2"
             data-bs-toggle="collapse" data-bs-target="#refSection">
@@ -151,33 +259,33 @@ body{background:var(--bg);color:var(--text);
     </button>
     <div class="collapse" id="refSection">
       <ul class="mb-0 small">
-        <li><strong>HOMA-IR</strong> = (Glucose × Insulin) / 405
-          <br>Typical: <strong>&lt; 2.0</strong> Normal • <strong>2.0–2.5</strong> Borderline • <strong>&gt; 2.5</strong> Insulin resistance
-          <br><em>Ref:</em> Matthews DR et&nbsp;al. <em>Diabetologia</em> 1985;28:412–419.
+        <li><strong>HOMA-IR</strong> = (Glucose × Insulin) / 405  
+          Typical &lt; 2 Normal • 2 – 2.5 Borderline • &gt; 2.5 Insulin resistance  
+          <em>Matthews DR et al., Diabetologia 1985 28:412-419</em>
         </li>
-        <li class="mt-2"><strong>HOMA-BETA</strong> = (20 × Insulin) / (Glucose − 3.5)
-          <br>Typical: <strong>60–140%</strong> Normal β-cell function • <strong>&lt; 60%</strong> Decreased • <strong>&gt; 140%</strong> High/compensatory
-          <br><em>Ref:</em> Matthews DR et&nbsp;al. 1985.
+        <li class="mt-2"><strong>HOMA-BETA</strong> = (20 × Insulin)/(Glucose − 3.5)  
+          Typical 60 – 140 % Normal β-cell function • &lt; 60 % Decreased • &gt; 140 % Compensatory  
+          <em>Matthews DR et al. 1985</em>
         </li>
-        <li class="mt-2"><strong>QUICKI</strong> = 1 / [log(Insulin) + log(Glucose)]
-          <br>Typical: <strong>&gt; 0.33</strong> Normal • <strong>0.30–0.33</strong> Borderline • <strong>&lt; 0.30</strong> Insulin resistance
-          <br><em>Ref:</em> Katz A et&nbsp;al. <em>J Clin Endocrinol Metab</em> 2000;85:2402–2410.
+        <li class="mt-2"><strong>QUICKI</strong> = 1 / [log(Insulin) + log(Glucose)]  
+          Typical &gt; 0.33 Normal • 0.30 – 0.33 Borderline • &lt; 0.30 Insulin resistance  
+          <em>Katz A et al., JCEM 2000 85:2402-2410</em>
         </li>
-        <li class="mt-2"><strong>Matsuda Index</strong> = 10000 / √(FPG × FPI × Mean G × Mean I)
-          <br>Typical: <strong>&gt; 4</strong> Normal • <strong>2.5–4</strong> Impaired • <strong>&lt; 2.5</strong> Resistant
-          <br><em>Ref:</em> Matsuda M, DeFronzo RA. <em>Diabetes Care</em> 1999;22:1462–1470.
+        <li class="mt-2"><strong>Matsuda Index</strong> = 10000 / √(FPG × FPI × Mean G × Mean I)  
+          Typical &gt; 4 Normal • 2.5 – 4 Impaired • &lt; 2.5 Resistant  
+          <em>Matsuda M & DeFronzo RA, Diabetes Care 1999 22:1462-1470</em>
         </li>
-        <li class="mt-2"><strong>ISI (0,120)</strong> = 10000 / √(G₀ × I₀ × G₁₂₀ × I₁₂₀)
-          <br>Typical: <strong>&gt; 4.3</strong> Normal • <strong>2.9–4.3</strong> Impaired • <strong>&lt; 2.9</strong> Resistant
-          <br><em>Ref:</em> Derived from OGTT sensitivity indices (Matsuda/DeFronzo framework).
+        <li class="mt-2"><strong>ISI (0,120)</strong> = 10000 / √(G₀ × I₀ × G₁₂₀ × I₁₂₀)  
+          Typical &gt; 4.3 Normal • 2.9 – 4.3 Impaired • &lt; 2.9 Resistant  
+          <em>Derived from Matsuda/DeFronzo framework</em>
         </li>
-        <li class="mt-2"><strong>Insulinogenic Index (IGI)</strong> = (Ins₃₀ − Ins₀) / (Gluc₃₀ − Gluc₀)
-          <br>Early insulin response; <strong>higher = better β-cell function</strong> (no universal cut-offs; cohort-dependent).
-          <br><em>Ref:</em> Kosaka K et&nbsp;al. <em>Diabetes</em> 1970;19:188–192.
+        <li class="mt-2"><strong>Insulinogenic Index (IGI)</strong> = (Ins₃₀ − Ins₀)/(Gluc₃₀ − Gluc₀)  
+          Higher = better early β-cell response.  
+          <em>Kosaka K et al., Diabetes 1970 19:188-192</em>
         </li>
-        <li class="mt-2"><strong>Disposition Index (DI)</strong> = IGI × Matsuda Index
-          <br>Composite β-cell compensation for insulin sensitivity; <strong>higher = better compensation</strong>.
-          <br><em>Ref:</em> Kahn SE. <em>Diabetologia</em> 2003;46:3–19.
+        <li class="mt-2"><strong>Disposition Index (DI)</strong> = IGI × Matsuda Index  
+          Composite β-cell compensation for sensitivity; higher = better compensation.  
+          <em>Kahn SE, Diabetologia 2003 46:3-19</em>
         </li>
       </ul>
     </div>
@@ -191,9 +299,9 @@ body{background:var(--bg);color:var(--text);
     <div class="collapse mt-2" id="legalNotice">
       <p class="small text-muted mx-auto" style="max-width:700px;">
         This calculator is intended for educational and research use only. It should not be used
-        to make medical diagnoses, guide treatment, or replace clinical judgment. No personal or
-        identifiable data are stored or transmitted. The author and contributors assume no
-        responsibility for clinical decisions made using these results.
+        to make medical diagnoses, guide treatment, or replace clinical judgment.
+        No personal or identifiable data are stored or transmitted.
+        The author assumes no responsibility for decisions made using these results.
       </p>
     </div>
   </div>
@@ -204,7 +312,7 @@ body{background:var(--bg);color:var(--text);
 </div>
 <!-- Bootstrap JS for collapsibles -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-<!-- jsPDF for real PDFs -->
+<!-- jsPDF for report generation -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <script>
@@ -222,9 +330,9 @@ body{background:var(--bg);color:var(--text);
   const scrollBtn=document.getElementById('scrollResults');
   const val=e=>parseFloat(e.value)||null, pos=v=>v&&v>0;
 
-  let mmol=false; // false = mg/dL & µU/mL; true = mmol/L & pmol/L
+  let mmol=false;
 
-  /* ---------- Unit toggle ---------- */
+  // ---------- Unit toggle ----------
   unitToggle.addEventListener('change',()=>{
     mmol=unitToggle.checked;
     if(mmol){
@@ -239,7 +347,7 @@ body{background:var(--bg);color:var(--text);
     compute(); checkReady();
   });
 
-  /* ---------- Interpretation helpers ---------- */
+  // ---------- Interpretation helpers ----------
   const stateHOMAIR=v=>!pos(v)?{txt:'—',cls:''}:v<2?{txt:'Normal',cls:'ok'}:v<=2.5?{txt:'Borderline',cls:'border'}:{txt:'Resistant',cls:'bad'};
   const stateHOMAB=v=>!pos(v)?{txt:'—',cls:''}:v<60?{txt:'Decreased',cls:'bad'}:v<=140?{txt:'Normal',cls:'ok'}:{txt:'High',cls:'border'};
   const stateQUICKI=v=>!pos(v)?{txt:'—',cls:''}:v>0.33?{txt:'Normal',cls:'ok'}:v>=0.30?{txt:'Borderline',cls:'border'}:{txt:'Resistant',cls:'bad'};
@@ -254,13 +362,12 @@ body{background:var(--bg);color:var(--text);
     list.appendChild(li);
   }
 
-  /* ---------- Main compute ---------- */
+  // ---------- Main compute ----------
   function compute(){
     list.innerHTML='';
     let g=val(fg), i=val(fi);
-    if(mmol){ g = g!=null ? g*18 : g; i = i!=null ? i/6 : i; }  // convert to canonical units
+    if(mmol){ g = g!=null ? g*18 : g; i = i!=null ? i/6 : i; }
 
-    // Fasting indices
     if(pos(g)&&pos(i)){
       const hIR=(i*g)/405; makeRow('HOMA-IR:', hIR.toFixed(4), stateHOMAIR(hIR));
       const gmmol=g/18;
@@ -268,23 +375,19 @@ body{background:var(--bg);color:var(--text);
       const q=1/(Math.log10(i)+Math.log10(g)); makeRow('QUICKI:', q.toFixed(4), stateQUICKI(q));
     }
 
-    // OGTT-based
     const G=gEls.map(val), I=iEls.map(val);
     if(G.every(pos)&&I.every(pos)&&pos(g)&&pos(i)){
       const Gm=G.reduce((a,b)=>a+b,0)/G.length, Im=I.reduce((a,b)=>a+b,0)/I.length;
       const m=10000/Math.sqrt((g*i)*(Gm*Im)); makeRow('Matsuda Index:', m.toFixed(4), stateMatsuda(m));
     }
 
-    // ISI (0,120)
     if(enableISI.checked){
       const g0=val(gEls[0]), i0=val(iEls[0]), g120=val(gEls[4]), i120=val(iEls[4]);
       if([g0,i0,g120,i120].every(pos)){
-        const isi=10000/Math.sqrt((g0*i0)*(g120*i120));
-        makeRow('ISI (0,120):', isi.toFixed(4), stateISI(isi));
+        const isi=10000/Math.sqrt((g0*i0)*(g120*i120)); makeRow('ISI (0,120):', isi.toFixed(4), stateISI(isi));
       }
     }
 
-    // IGI & DI
     if(enableAdvanced.checked){
       const g0=val(gEls[0]), i0=val(iEls[0]), g30=val(document.getElementById('g30')), i30=val(document.getElementById('i30'));
       if(pos(g0)&&pos(i0)&&pos(g30)&&pos(i30)&&g30!==g0){
@@ -310,7 +413,7 @@ body{background:var(--bg);color:var(--text);
     if(pos(g)&&pos(i)) readyText.classList.add('show'); else readyText.classList.remove('show');
   }
 
-  /* ---------- Dot highlight logic ---------- */
+  // ---------- Dot highlights ----------
   function highlightRequired(){
     document.querySelectorAll('.form-label').forEach(l=>l.classList.remove('dot-red','dot-blue'));
     if(enableISI.checked){
@@ -325,7 +428,7 @@ body{background:var(--bg);color:var(--text);
     }
   }
 
-  /* ---------- Event bindings ---------- */
+  // ---------- Event bindings ----------
   document.querySelectorAll('input').forEach(el=>{
     el.addEventListener('input', ()=>{ compute(); checkReady(); });
   });
@@ -343,7 +446,7 @@ body{background:var(--bg);color:var(--text);
   };
   scrollBtn.onclick=()=>document.getElementById('results').scrollIntoView({behavior:'smooth'});
 
-  /* ---------- Timestamp (IST) ---------- */
+  // ---------- Timestamp ----------
   function indianTimestamp(){
     const d=new Date();
     const dd=String(d.getDate()).padStart(2,'0');
@@ -354,7 +457,7 @@ body{background:var(--bg);color:var(--text);
     return `${dd}/${mm}/${yyyy} ${hh}:${min}`;
   }
 
-  /* ---------- PDF generator ---------- */
+  // ---------- PDF Generator ----------
   document.getElementById('pdfBtn').addEventListener('click',()=>{
     const {jsPDF}=window.jspdf; const doc=new jsPDF({unit:"pt",format:"a4"});
     doc.setProperties({
@@ -415,7 +518,7 @@ body{background:var(--bg);color:var(--text);
     doc.save(fname);
   });
 
-  /* ---------- Init ---------- */
+  // ---------- Init ----------
   compute(); checkReady(); highlightRequired();
 })();
 </script>
